@@ -92,9 +92,61 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     fontFamily: fontFamily,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.accent,
-      brightness: Brightness.dark,
+    scaffoldBackgroundColor: const Color(0xFF0F1419),
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFFF5A623), // Sandy Yellow (brighter for dark)
+      secondary: Color(0xFF4A7A5A), // Palm Green
+      tertiary: Color(0xFF8E4EF2), // Brighter Violet
+      error: Color(0xFFEF4444),
+      surface: Color(0xFF1C2333), // Dark card surface
+      onPrimary: Color(0xFF0F1419),
+      onSecondary: Colors.white,
+      onTertiary: Colors.white,
+      onError: Colors.white,
+      onSurface: Color(0xFFF5F5F5),
+      outline: Color(0xFF2C3544),
+    ),
+    appBarTheme: const AppBarTheme(
+      centerTitle: false,
+      elevation: 0,
+      backgroundColor: Color(0xFF0F1419),
+      foregroundColor: Color(0xFFF5F5F5),
+    ),
+    cardTheme: CardThemeData(
+      color: const Color(0xFF1C2333),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(cardRadius),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF1C2333),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(buttonRadius),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(buttonRadius),
+        borderSide: const BorderSide(color: Color(0xFF8E4EF2), width: 1.5),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF8E4EF2),
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: const Color(0xFF2C3544),
+        disabledForegroundColor: const Color(0xFF6B7280),
+        minimumSize: const Size.fromHeight(buttonHeight),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(buttonRadius),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          fontFamily: fontFamily,
+        ),
+      ),
     ),
   );
 }

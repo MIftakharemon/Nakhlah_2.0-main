@@ -6,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'bindings/initial_binding.dart';
 import 'common/app_motion.dart';
 import 'constants/app_theme.dart';
+import 'controllers/theme_controller.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
 import 'services/api_service.dart';
@@ -19,6 +20,7 @@ Future<void> main() async {
   // uses the same ApiService + StorageService instances after reload.
   final storage = Get.put(StorageService(), permanent: true);
   Get.put(ApiService(storage), permanent: true);
+  Get.put(ThemeController(), permanent: true);
 
   await _refreshSessionOnStartup();
   runApp(const NakhlahApp());
@@ -55,7 +57,8 @@ class NakhlahApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final storage = Get.find<StorageService>();
     final startRoute = storage.isLoggedIn ? Routes.shell : Routes.getStarted;
-    return GetMaterialApp(
+    final themeCtrl = Get.find<ThemeController>();
+    return Obx(() => GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Nakhlah 2.0',
       initialBinding: InitialBinding(),
@@ -63,9 +66,9 @@ class NakhlahApp extends StatelessWidget {
       getPages: AppPages.pages,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.light,
+      themeMode: themeCtrl.themeMode,
       defaultTransition: Transition.cupertino,
       transitionDuration: AppMotion.page,
-    );
+    ));
   }
 }

@@ -5,6 +5,7 @@ import '../../common/app_motion.dart';
 import '../../common/nakhlah_mascot.dart';
 import '../../constants/app_colors.dart';
 import '../../controllers/gamification_controller.dart';
+import '../../constants/dark_mode_colors.dart';
 import '../../routes/app_routes.dart';
 
 class GamificationView extends StatefulWidget {
@@ -19,12 +20,13 @@ void _showStoreFeatureSheet(BuildContext context, _StoreFeature feature) {
     context: context,
     backgroundColor: Colors.transparent,
     builder: (context) {
+      final dc = DarkModeColors.of(context);
       return SafeArea(
         child: Container(
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: dc.cardBackground,
             borderRadius: BorderRadius.circular(24),
           ),
           child: Column(
@@ -50,10 +52,10 @@ void _showStoreFeatureSheet(BuildContext context, _StoreFeature feature) {
                   Expanded(
                     child: Text(
                       feature.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: dc.textPrimary,
                       ),
                     ),
                   ),
@@ -65,7 +67,7 @@ void _showStoreFeatureSheet(BuildContext context, _StoreFeature feature) {
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.5,
-                  color: AppColors.muted,
+                  color: dc.textSecondary,
                 ),
               ),
               const SizedBox(height: 20),
@@ -118,8 +120,9 @@ class _GamificationViewState extends State<GamificationView> {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF8F5),
+      backgroundColor: dc.cardBackgroundAlt,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -422,6 +425,7 @@ class _FeatureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -435,7 +439,7 @@ class _FeatureCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Ink(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: dc.cardBackground,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -464,10 +468,10 @@ class _FeatureCard extends StatelessWidget {
                   children: [
                     Text(
                       feature.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink,
+                        color: dc.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -475,7 +479,7 @@ class _FeatureCard extends StatelessWidget {
                       feature.subtitle,
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.muted,
+                        color: dc.textSecondary,
                         height: 1.4,
                       ),
                     ),

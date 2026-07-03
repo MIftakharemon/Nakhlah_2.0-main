@@ -16,6 +16,7 @@ import '../../models/models.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/nakhlah_icons.dart';
 import '../exercises/exercise_view.dart';
+import '../../constants/dark_mode_colors.dart';
 
 const _kLastInteractedNodeIdKey = 'nakhlah:lastInteractedNodeId';
 
@@ -600,12 +601,12 @@ class _GlassStatsBar extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Palm Trees',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
-                  color: _WebColors.foreground,
+                  color: Theme.of(ctx).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
@@ -632,10 +633,10 @@ class _GlassStatsBar extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 '$currentPalms of $maxPalms remaining',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: _WebColors.mutedForeground,
+                  color: Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 20),
@@ -669,12 +670,12 @@ class _GlassStatsBar extends StatelessWidget {
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text(
+                child: Text(
                   'Close',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: _WebColors.mutedForeground,
+                    color: Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -695,6 +696,7 @@ class _HeaderIconValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return PressableScale(
       scale: .94,
       child: GestureDetector(
@@ -708,8 +710,8 @@ class _HeaderIconValue extends StatelessWidget {
               const SizedBox(width: 7),
               Text(
                 '$value',
-                style: const TextStyle(
-                  color: _WebColors.foreground,
+                style: TextStyle(
+                  color: dc.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                   height: 1,
@@ -1105,6 +1107,7 @@ class _GlassProfileSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return _GlassCard(
       child: Obx(() {
         final profile = controller.profile.value;
@@ -1131,26 +1134,26 @@ class _GlassProfileSectionCard extends StatelessWidget {
                 children: [
                   Text(
                     profile?.fullName ?? 'Nakhlah Learner',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 17,
-                      color: _WebColors.foreground,
+                      color: dc.textPrimary,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     '${profile?.onboardInfo.goalTime ?? 0} min daily goal',
-                    style: const TextStyle(
-                      color: _WebColors.mutedForeground,
+                    style: TextStyle(
+                      color: dc.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: _WebColors.mutedForeground,
+              color: dc.textSecondary,
             ),
           ],
         );
@@ -1217,7 +1220,7 @@ void _showLessonChooserDialog(BuildContext context, String taskId) {
         child: Container(
           constraints: const BoxConstraints(maxWidth: 420, maxHeight: 580),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(24),
           ),
           clipBehavior: Clip.antiAlias,
@@ -1306,13 +1309,13 @@ void _showLessonChooserDialog(BuildContext context, String taskId) {
                     ),
                   )
                 else if (lessons.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(32),
+                  Padding(
+                    padding: const EdgeInsets.all(32),
                     child: Center(
                       child: Text(
                         'No lessons available yet.',
                         style: TextStyle(
-                          color: _WebColors.mutedForeground,
+                          color: Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.6),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1358,8 +1361,8 @@ void _showLessonChooserDialog(BuildContext context, String taskId) {
                     child: Text(
                       footerText,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: _WebColors.mutedForeground,
+                      style: TextStyle(
+                        color: Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: .6,
@@ -1517,9 +1520,9 @@ class _LessonDialogCard extends StatelessWidget {
                             width: 2,
                           ),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.lock_rounded,
-                          color: _WebColors.mutedForeground,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           size: 12,
                         ),
                       ),
@@ -1535,7 +1538,9 @@ class _LessonDialogCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: locked ? _WebColors.mutedForeground : _WebColors.foreground,
+                  color: locked
+                      ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)
+                      : Theme.of(context).colorScheme.onSurface,
                   height: 1.25,
                 ),
               ),

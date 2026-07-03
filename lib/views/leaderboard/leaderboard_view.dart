@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../common/empty_state.dart';
 import '../../common/loading_state.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/dark_mode_colors.dart';
 import '../../controllers/profile_controller.dart';
 import '../../models/models.dart';
 
@@ -96,8 +97,9 @@ class _LeaderboardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: dc.cardBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -107,11 +109,11 @@ class _LeaderboardList extends StatelessWidget {
               // ── Header ─────────────────────────────────────────────
               Row(
                 children: [
-                  Text(
+                   Text(
                     'Leaderboard',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w900,
-                          color: AppColors.ink,
+                          color: dc.textPrimary,
                           fontSize: 28,
                         ),
                   ),
@@ -120,7 +122,7 @@ class _LeaderboardList extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.date.withValues(alpha: .15),
+                      color: dc.surfaceBackground,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -352,6 +354,7 @@ class _NameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
@@ -359,7 +362,7 @@ class _NameCard extends StatelessWidget {
         vertical: large ? 12 : 10,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: dc.cardBackground,
         borderRadius: BorderRadius.circular(16),
         border: large
             ? Border.all(color: const Color(0xFF8B5CF6).withValues(alpha: .2), width: 1.5)
@@ -383,7 +386,7 @@ class _NameCard extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: large ? 14 : 12,
-              color: AppColors.ink,
+              color: dc.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -460,6 +463,7 @@ class _LeaderboardRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     final colors = _gradientFor(colorIndex);
     final imageUrl = entry.absolutePictureUrl;
 
@@ -471,11 +475,11 @@ class _LeaderboardRow extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: dc.cardBackground,
             borderRadius: BorderRadius.circular(20),
             border: entry.isCurrentUser
                 ? Border.all(color: const Color(0xFF8B5CF6), width: 2)
-                : Border.all(color: Colors.grey.shade200),
+                : Border.all(color: dc.border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: .04),
@@ -494,7 +498,7 @@ class _LeaderboardRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.muted,
+                    color: dc.textMuted,
                   ),
                 ),
               ),
@@ -552,13 +556,13 @@ class _LeaderboardRow extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         color: entry.isCurrentUser
                             ? const Color(0xFF8B5CF6)
-                            : AppColors.ink,
+                            : dc.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       '${entry.injazCount} Injaz',
-                      style: TextStyle(fontSize: 13, color: AppColors.muted),
+                      style: TextStyle(fontSize: 13, color: dc.textMuted),
                     ),
                   ],
                 ),
@@ -587,6 +591,7 @@ class UserProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     final colors = _gradientFor(user.rank - 1);
 
     // Weekly activity mock data (matches website)
@@ -601,7 +606,7 @@ class UserProfilePage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: dc.cardBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -634,9 +639,9 @@ class UserProfilePage extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: dc.cardBackground,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: dc.border),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: .05),
@@ -711,10 +716,10 @@ class UserProfilePage extends StatelessWidget {
                     // Name
                     Text(
                       user.fullName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.ink,
+                        color: dc.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -725,7 +730,7 @@ class UserProfilePage extends StatelessWidget {
                         user.email!,
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.muted,
+                          color: dc.textMuted,
                         ),
                       ),
                     const SizedBox(height: 20),
@@ -783,7 +788,7 @@ class UserProfilePage extends StatelessWidget {
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
-                                color: AppColors.ink,
+                                color: dc.textPrimary,
                               ),
                             ),
                           ),
@@ -800,9 +805,9 @@ class UserProfilePage extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: dc.cardBackground,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: dc.border),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: .05),
@@ -819,7 +824,6 @@ class UserProfilePage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.ink,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -859,7 +863,7 @@ class UserProfilePage extends StatelessWidget {
                                       child: Text(
                                         injazData[idx].day,
                                         style: TextStyle(
-                                          color: AppColors.muted,
+                                          color: dc.textMuted,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -937,6 +941,7 @@ class _ProfileStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return Column(
       children: [
         Text(
@@ -952,7 +957,7 @@ class _ProfileStat extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.muted,
+            color: dc.textMuted,
             fontWeight: FontWeight.w600,
           ),
         ),

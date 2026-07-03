@@ -12,6 +12,7 @@ import '../../common/app_snackbar.dart';
 import '../../common/loading_state.dart';
 import '../../common/responsive.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/dark_mode_colors.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/gamification_controller.dart';
 import '../../controllers/profile_controller.dart';
@@ -58,12 +59,13 @@ class _ProfileViewState extends State<ProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     final p = Get.find<ProfileController>();
     final a = Get.find<AuthController>();
     final g = Get.find<GamificationController>();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: dc.cardBackground,
       body: PageShell(
         child: Obx(() {
           if (p.loading.value && p.profile.value == null) {
@@ -109,6 +111,7 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildAppBar(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -133,7 +136,6 @@ class _ProfileViewState extends State<ProfileView> {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppColors.ink,
               ),
             ),
           ],
@@ -146,13 +148,13 @@ class _ProfileViewState extends State<ProfileView> {
                   ShareParams(text: 'Check out my progress on Nakhlah!'),
                 );
               },
-              icon: const Icon(Icons.send_outlined, color: AppColors.ink),
+              icon: Icon(Icons.send_outlined, color: dc.iconPrimary),
             ),
             IconButton(
               onPressed: () {
                 Get.toNamed(Routes.settings);
               },
-              icon: const Icon(Icons.settings_outlined, color: AppColors.ink),
+              icon: Icon(Icons.settings_outlined, color: dc.iconPrimary),
             ),
           ],
         ),
@@ -165,6 +167,7 @@ class _ProfileViewState extends State<ProfileView> {
     ProfileController p,
     AuthController a,
   ) {
+    final dc = DarkModeColors.of(context);
     String? imageUrl = p.profile.value?.profilePicture?.absoluteUrl;
     if (imageUrl != null && imageUrl.isNotEmpty && _pictureVersion > 0) {
       imageUrl = '$imageUrl?v=$_pictureVersion';
@@ -186,7 +189,7 @@ class _ProfileViewState extends State<ProfileView> {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
+                  border: Border.all(color: dc.cardBackground, width: 4),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.08),
@@ -219,7 +222,7 @@ class _ProfileViewState extends State<ProfileView> {
                   decoration: BoxDecoration(
                     color: AppColors.accent,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: dc.cardBackground, width: 2),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.1),
@@ -237,16 +240,16 @@ class _ProfileViewState extends State<ProfileView> {
         const SizedBox(height: 16),
         Text(
           name,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppColors.ink,
+            color: dc.textPrimary,
           ),
         ),
         const SizedBox(height: 6),
         Text(
           '$goalTime min daily goal',
-          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          style: TextStyle(fontSize: 14, color: dc.textSecondary),
         ),
       ],
     );
@@ -296,13 +299,14 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildGamificationStatCard(_GamificationStat stat) {
+    final dc = DarkModeColors.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: dc.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: dc.border),
       ),
       child: Column(
         children: [
@@ -310,16 +314,16 @@ class _ProfileViewState extends State<ProfileView> {
           const SizedBox(height: 6),
           Text(
             stat.value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.ink,
+              color: dc.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             stat.label,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 11, color: dc.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -385,6 +389,7 @@ class _ProfileViewState extends State<ProfileView> {
     ProfileController p,
     GamificationController g,
   ) {
+    final dc = DarkModeColors.of(context);
     final stats = [
       _StatData(
         icon: '🔥',
@@ -411,14 +416,14 @@ class _ProfileViewState extends State<ProfileView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
             Text(
               'Your Statistics',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.ink,
+                color: dc.textPrimary,
               ),
             ),
             SizedBox(width: 8),
@@ -440,9 +445,9 @@ class _ProfileViewState extends State<ProfileView> {
             final stat = stats[index];
             return Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: dc.cardBackground,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: dc.border),
               ),
               padding: const EdgeInsets.all(14),
               child: Column(
@@ -455,10 +460,10 @@ class _ProfileViewState extends State<ProfileView> {
                       const SizedBox(width: 8),
                       Text(
                         stat.value,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.ink,
+                          color: dc.textPrimary,
                         ),
                       ),
                     ],
@@ -470,7 +475,7 @@ class _ProfileViewState extends State<ProfileView> {
                       stat.label,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: dc.textSecondary,
                       ),
                     ),
                   ),
@@ -554,15 +559,17 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildSettingsLinks(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: dc.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: dc.border),
       ),
       child: Column(
         children: [
           _buildSettingsLinkItem(
+            context: context,
             icon: Icons.bar_chart,
             iconBg: const Color(0xFFE3F2FD),
             iconColor: const Color(0xFF42A5F5),
@@ -571,6 +578,7 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           const Divider(height: 1, indent: 56),
           _buildSettingsLinkItem(
+            context: context,
             icon: Icons.help_outline,
             iconBg: const Color(0xFFE0F7FA),
             iconColor: const Color(0xFF26C6DA),
@@ -579,6 +587,7 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           const Divider(height: 1, indent: 56),
           _buildSettingsLinkItem(
+            context: context,
             icon: Icons.description_outlined,
             iconBg: const Color(0xFFE8F5E9),
             iconColor: const Color(0xFF66BB6A),
@@ -587,6 +596,7 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           const Divider(height: 1, indent: 56),
           _buildSettingsLinkItem(
+            context: context,
             icon: Icons.mail_outline,
             iconBg: const Color(0xFFFFF3E0),
             iconColor: const Color(0xFFFF9800),
@@ -599,12 +609,14 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildSettingsLinkItem({
+    required BuildContext context,
     required IconData icon,
     required Color iconBg,
     required Color iconColor,
     required String title,
     required VoidCallback onTap,
   }) {
+    final dc = DarkModeColors.of(context);
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -624,14 +636,14 @@ class _ProfileViewState extends State<ProfileView> {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.ink,
+                  color: dc.textPrimary,
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+            Icon(Icons.chevron_right, color: dc.iconSecondary, size: 20),
           ],
         ),
       ),
@@ -639,14 +651,15 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildXpChartSection(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     final weeklyData = [980, 340, 520, 680, 920, 640, 880];
     final totalXp = weeklyData.reduce((a, b) => a + b);
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: dc.cardBackground,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: dc.border),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -660,7 +673,6 @@ class _ProfileViewState extends State<ProfileView> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.ink,
                 ),
               ),
               Text(
@@ -668,7 +680,6 @@ class _ProfileViewState extends State<ProfileView> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.ink,
                 ),
               ),
             ],
@@ -678,59 +689,64 @@ class _ProfileViewState extends State<ProfileView> {
             height: 180,
             child: CustomPaint(
               size: const Size(double.infinity, 180),
-              painter: _AreaChartPainter(data: weeklyData),
+              painter: _AreaChartPainter(
+                data: weeklyData,
+                labelColor: dc.textMuted,
+                gridColor: dc.borderLight,
+                dotColor: dc.cardBackground,
+              ),
             ),
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Expanded(
                 child: Text(
                   'Mon',
-                  style: TextStyle(fontSize: 12.0, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.0, color: dc.textMuted),
                   textAlign: TextAlign.center,
                 ),
               ),
               Expanded(
                 child: Text(
                   'Tue',
-                  style: TextStyle(fontSize: 12.0, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.0, color: dc.textMuted),
                   textAlign: TextAlign.center,
                 ),
               ),
               Expanded(
                 child: Text(
                   'Wed',
-                  style: TextStyle(fontSize: 12.0, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.0, color: dc.textMuted),
                   textAlign: TextAlign.center,
                 ),
               ),
               Expanded(
                 child: Text(
                   'Thu',
-                  style: TextStyle(fontSize: 12.0, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.0, color: dc.textMuted),
                   textAlign: TextAlign.center,
                 ),
               ),
               Expanded(
                 child: Text(
                   'Fri',
-                  style: TextStyle(fontSize: 12.0, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.0, color: dc.textMuted),
                   textAlign: TextAlign.center,
                 ),
               ),
               Expanded(
                 child: Text(
                   'Sat',
-                  style: TextStyle(fontSize: 12.0, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.0, color: dc.textMuted),
                   textAlign: TextAlign.center,
                 ),
               ),
               Expanded(
                 child: Text(
                   'Sun',
-                  style: TextStyle(fontSize: 12.0, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.0, color: dc.textMuted),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -745,32 +761,33 @@ class _ProfileViewState extends State<ProfileView> {
     BuildContext context,
     GamificationController g,
   ) {
+    final dc = DarkModeColors.of(context);
     final achievements = g.achievements.take(3).toList();
     final achievedCount = g.achievements.where((a) => a.achieved).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
             Text(
               'Your Achievements',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.ink,
+                color: dc.textPrimary,
               ),
             ),
-            SizedBox(width: 8),
-            Text('🏆', style: TextStyle(fontSize: 18)),
+            const SizedBox(width: 8),
+            const Text('🏆', style: TextStyle(fontSize: 18)),
           ],
         ),
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: dc.cardBackground,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: dc.border),
           ),
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -780,10 +797,10 @@ class _ProfileViewState extends State<ProfileView> {
                 children: [
                   Text(
                     '$achievedCount Achievements',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.ink,
+                      color: dc.textPrimary,
                     ),
                   ),
                   const Icon(Icons.arrow_forward, color: AppColors.accent),
@@ -792,11 +809,11 @@ class _ProfileViewState extends State<ProfileView> {
               const SizedBox(height: 16),
               const Divider(height: 1),
               if (achievements.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Text(
                     'No achievements yet. Keep learning!',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: dc.textMuted),
                   ),
                 )
               else
@@ -818,6 +835,7 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildAchievementItem(AchievementModel achievement) {
+    final dc = DarkModeColors.of(context);
     final target = achievement.unitOrder > 0 ? achievement.unitOrder : 10;
     final progress = target > 0 ? achievement.levelOrder / target : 0.0;
     final progressClamped = progress.clamp(0.0, 1.0);
@@ -879,16 +897,16 @@ class _ProfileViewState extends State<ProfileView> {
               children: [
                 Text(
                   achievement.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.ink,
+                    color: dc.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   achievement.achievementTitle,
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 13, color: dc.textSecondary),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -900,7 +918,7 @@ class _ProfileViewState extends State<ProfileView> {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: progressClamped,
-                          backgroundColor: Colors.grey.shade200,
+                          backgroundColor: dc.border,
                           valueColor: const AlwaysStoppedAnimation(
                             AppColors.accent,
                           ),
@@ -980,7 +998,15 @@ class _GamificationStat {
 
 class _AreaChartPainter extends CustomPainter {
   final List<int> data;
-  const _AreaChartPainter({required this.data});
+  final Color labelColor;
+  final Color gridColor;
+  final Color dotColor;
+  const _AreaChartPainter({
+    required this.data,
+    required this.labelColor,
+    required this.gridColor,
+    required this.dotColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -995,7 +1021,7 @@ class _AreaChartPainter extends CustomPainter {
     final chartWidth = size.width - padding.horizontal;
     final chartHeight = size.height - padding.vertical;
 
-    final labelStyle = TextStyle(color: Colors.grey.shade400, fontSize: 11);
+    final labelStyle = TextStyle(color: labelColor, fontSize: 11);
 
     for (int i = 0; i <= 5; i++) {
       final value = (maxValue / 5 * i).toInt();
@@ -1013,7 +1039,7 @@ class _AreaChartPainter extends CustomPainter {
 
       if (i > 0) {
         final gridPaint = Paint()
-          ..color = Colors.grey.shade100
+          ..color = gridColor
           ..strokeWidth = 1;
         canvas.drawLine(
           Offset(labelWidth, y),
@@ -1070,7 +1096,7 @@ class _AreaChartPainter extends CustomPainter {
 
     for (final point in points) {
       final pointPaint = Paint()
-        ..color = Colors.white
+        ..color = dotColor
         ..style = PaintingStyle.fill;
       final pointBorderPaint = Paint()
         ..color = AppColors.accent
