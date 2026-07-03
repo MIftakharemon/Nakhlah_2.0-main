@@ -369,50 +369,57 @@ class _LearnDashboardState extends State<_LearnDashboard> {
       _nodeKeys.putIfAbsent(node.apiId, () => GlobalKey());
     }
 
-    return ValueListenableBuilder<double>(
-      valueListenable: _scrollProgress,
-      builder: (context, progress, _) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: _buildGradient(progress),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    const SliverToBoxAdapter(
-                      child: _SectionUnlockerPlaceholder(),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: _ZigzagPath(
-                          sections: flat.sections,
-                          nodes: flat.nodes,
-                          nodeKeys: _nodeKeys,
-                        ),
+    return Stack(
+      children: [
+        // Background gradient — only this repaints on scroll
+        AnimatedBuilder(
+          animation: _scrollController,
+          builder: (context, _) {
+            final progress = _scrollProgress.value;
+            return Container(
+              decoration: BoxDecoration(
+                gradient: _buildGradient(progress),
+              ),
+            );
+          },
+        ),
+        // Scroll content — never rebuilds from scroll
+        Column(
+          children: [
+            Expanded(
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  const SliverToBoxAdapter(
+                    child: _SectionUnlockerPlaceholder(),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                      child: _ZigzagPath(
+                        sections: flat.sections,
+                        nodes: flat.nodes,
+                        nodeKeys: _nodeKeys,
                       ),
                     ),
-                    SliverToBoxAdapter(
-                      // child: Padding(
-                      //   padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
-                      //   child: Column(
-                      //     children: [
-                      //       _GlassProfileSectionCard(controller: widget.profile),
-                      //     ],
-                      //   ),
-                      // ),
-                    ),
-                  ],
-                ),
+                  ),
+                  SliverToBoxAdapter(
+                    // child: Padding(
+                    //   padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+                    //   child: Column(
+                    //     children: [
+                    //       _GlassProfileSectionCard(controller: widget.profile),
+                    //     ],
+                    //   ),
+                    // ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ],
     );
   }
 
