@@ -75,6 +75,7 @@ class _ExerciseViewState extends State<ExerciseView>
   late Animation<double> _feedbackAnimation;
 
   late AudioPlayer _audioPlayer;
+  late AudioPlayer _sfxPlayer;
   bool _audioLoading = false;
 
   LessonEngineArgs? _args;
@@ -92,6 +93,7 @@ class _ExerciseViewState extends State<ExerciseView>
     );
 
     _audioPlayer = AudioPlayer(useProxyForRequestHeaders: false);
+    _sfxPlayer = AudioPlayer();
 
     _contentService = Get.find<ContentService>();
     _args = Get.arguments is LessonEngineArgs
@@ -110,6 +112,7 @@ class _ExerciseViewState extends State<ExerciseView>
   void dispose() {
     _timer?.cancel();
     _audioPlayer.dispose();
+    _sfxPlayer.dispose();
     _feedbackController.dispose();
     Get.find<GamificationController>().load();
     super.dispose();
@@ -271,11 +274,13 @@ class _ExerciseViewState extends State<ExerciseView>
     if (isCorrect) {
       _correctAnswers++;
       _feedbackController.forward(from: 0);
+      _playSfx('assets/audio/correct.mp3');
     } else {
       _hasWrongAnswer = true;
       _palmTrees--;
       _feedbackController.forward(from: 0);
       _reportWrongAnswer();
+      _playSfx('assets/audio/wrong.mp3');
       if (_palmTrees <= 0) {
         _showOutOfLivesDialog();
         return;
@@ -291,6 +296,7 @@ class _ExerciseViewState extends State<ExerciseView>
 
   Future<void> _completeLesson() async {
     _timer?.cancel();
+    _playSfx('assets/audio/click.mp3');
 
     try {
       if (_hasWrongAnswer) {
@@ -351,6 +357,14 @@ class _ExerciseViewState extends State<ExerciseView>
     } finally {
       if (mounted) setState(() => _audioLoading = false);
     }
+  }
+
+  Future<void> _playSfx(String assetPath) async {
+    try {
+      await _sfxPlayer.stop();
+      await _sfxPlayer.setAsset(assetPath);
+      await _sfxPlayer.play();
+    } catch (_) {}
   }
 
   void _handleBack() => _showLeavingDialog();
@@ -1162,6 +1176,7 @@ class _ExerciseViewState extends State<ExerciseView>
         _matchedPairs[leftMatchKey] = rightItem.matchKey;
         _selectedLeftId = null;
       });
+      _playSfx('assets/audio/correct.mp3');
       if (_matchedPairs.length == question.answers.length) {
         setState(() {
           _questionAnswered = true;
@@ -1176,6 +1191,7 @@ class _ExerciseViewState extends State<ExerciseView>
         _hasWrongAnswer = true;
         _palmTrees--;
         _reportWrongAnswer();
+        _playSfx('assets/audio/wrong.mp3');
         if (_palmTrees <= 0) {
           _showOutOfLivesDialog();
           return;
