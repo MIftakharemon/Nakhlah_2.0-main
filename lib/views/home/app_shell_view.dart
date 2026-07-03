@@ -55,14 +55,18 @@ class AppShellView extends StatelessWidget {
         ),
         bottomNavigationBar: ClipRRect(
           child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xB3FFFFFF), // white/70
+                color: c.tabIndex.value == 0
+                    ? const Color(0xD9F5E6D0).withOpacity(0.85)
+                    : Colors.white,
                 border: Border(
                   top: BorderSide(
-                    color: const Color(0x33FFFFFF), // white/20
+                    color: c.tabIndex.value == 0
+                        ? const Color(0x33D4A574)
+                        : const Color(0xFFE5E5E5),
                     width: 1,
                   ),
                 ),
