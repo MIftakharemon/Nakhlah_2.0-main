@@ -57,7 +57,7 @@ class AppShellView extends StatelessWidget {
           child: BackdropFilter(
             filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
                 color: c.tabIndex.value == 0
                     ? const Color(0xD9F5E6D0).withOpacity(0.85)

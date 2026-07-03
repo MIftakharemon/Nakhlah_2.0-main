@@ -191,7 +191,7 @@ class _MainContent extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+          padding: const EdgeInsets.fromLTRB(0.5, 28, 0.5, 0.1),
           child: _GlassStatsBar(
             streak: gamification.streak.value.currentStreak,
             dates: gamification.stock.value.dateStock,
@@ -549,10 +549,10 @@ class _GlassStatsBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
             color: const Color(0x4DFFFFFF), // bg-white/30
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(0.5),
             border: Border.all(
               color: const Color(0x66FFFFFF), // border-white/40
               width: 1,
