@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -27,6 +29,7 @@ class AppShellView extends StatelessWidget {
 
     return Obx(
       () => Scaffold(
+        backgroundColor: Colors.transparent,
         body: AnimatedSwitcher(
           duration: AppMotion.normal,
           switchInCurve: AppMotion.out,
@@ -50,45 +53,56 @@ class AppShellView extends StatelessWidget {
             child: pages[c.tabIndex.value],
           ),
         ),
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavItem(
-                iconPath: 'assets/nakhlah_web/icons/Home-Icon.127e8555.svg',
-                label: 'Home',
-                isSelected: c.tabIndex.value == 0,
-                onTap: () => c.setTab(0),
+        bottomNavigationBar: ClipRRect(
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xB3FFFFFF), // white/70
+                border: Border(
+                  top: BorderSide(
+                    color: const Color(0x33FFFFFF), // white/20
+                    width: 1,
+                  ),
+                ),
               ),
-              _NavItem(
-                iconPath: 'assets/nakhlah_web/icons/LEADERBOARD.b7e283d4.svg',
-                label: 'Leaderboard',
-                isSelected: c.tabIndex.value == 1,
-                onTap: () => c.setTab(1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _NavItem(
+                    iconPath: 'assets/nakhlah_web/icons/Home-Icon.127e8555.svg',
+                    label: 'Home',
+                    isSelected: c.tabIndex.value == 0,
+                    onTap: () => c.setTab(0),
+                  ),
+                  _NavItem(
+                    iconPath: 'assets/nakhlah_web/icons/LEADERBOARD.b7e283d4.svg',
+                    label: 'Leaderboard',
+                    isSelected: c.tabIndex.value == 1,
+                    onTap: () => c.setTab(1),
+                  ),
+                  _NavItem(
+                    iconPath: 'assets/nakhlah_web/icons/STORE.9b24d09f.svg',
+                    label: 'Store',
+                    isSelected: c.tabIndex.value == 2,
+                    onTap: () => c.setTab(2),
+                  ),
+                  _NavItem(
+                    iconPath: 'assets/nakhlah_web/icons/Profile.f8f9b305.svg',
+                    label: 'Profile',
+                    isSelected: c.tabIndex.value == 3,
+                    onTap: () => c.setTab(3),
+                  ),
+                  _NavItem(
+                    iconPath: 'assets/nakhlah_web/icons/logout.125f3808.svg',
+                    label: 'Logout',
+                    isSelected: false,
+                    onTap: _showLogoutDialog,
+                  ),
+                ],
               ),
-              _NavItem(
-                iconPath: 'assets/nakhlah_web/icons/STORE.9b24d09f.svg',
-                label: 'Store',
-                isSelected: c.tabIndex.value == 2,
-                onTap: () => c.setTab(2),
-              ),
-              _NavItem(
-                iconPath: 'assets/nakhlah_web/icons/Profile.f8f9b305.svg',
-                label: 'Profile',
-                isSelected: c.tabIndex.value == 3,
-                onTap: () => c.setTab(3),
-              ),
-              _NavItem(
-                iconPath: 'assets/nakhlah_web/icons/logout.125f3808.svg',
-                label: 'Logout',
-                isSelected: false,
-                onTap: _showLogoutDialog,
-              ),
-            ],
+            ),
           ),
         ),
       ),

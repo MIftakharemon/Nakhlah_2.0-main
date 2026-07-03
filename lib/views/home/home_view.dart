@@ -45,6 +45,7 @@ class _HomeViewState extends State<HomeView> {
     final gamification = Get.find<GamificationController>();
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: RefreshIndicator(
         color: const Color(0xFF7D49DF),
         onRefresh: () async {
@@ -249,12 +250,14 @@ class _LearnDashboard extends StatefulWidget {
 
 class _LearnDashboardState extends State<_LearnDashboard> {
   final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _scrollProgress = ValueNotifier(0.0);
   bool _hasScrolledToResume = false;
   final Map<String, GlobalKey> _nodeKeys = {};
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _scrollToResumePosition();
     });
@@ -262,8 +265,18 @@ class _LearnDashboardState extends State<_LearnDashboard> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _scrollProgress.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    if (maxScroll <= 0) return;
+    final progress = (_scrollController.offset / maxScroll).clamp(0.0, 1.0);
+    _scrollProgress.value = progress;
   }
 
   @override
@@ -356,41 +369,94 @@ class _LearnDashboardState extends State<_LearnDashboard> {
       _nodeKeys.putIfAbsent(node.apiId, () => GlobalKey());
     }
 
-    return Column(
-      children: [
-        Expanded(
-          child: CustomScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              const SliverToBoxAdapter(
-                child: _SectionUnlockerPlaceholder(),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: _ZigzagPath(
-                    sections: flat.sections,
-                    nodes: flat.nodes,
-                    nodeKeys: _nodeKeys,
-                  ),
+    return ValueListenableBuilder<double>(
+      valueListenable: _scrollProgress,
+      builder: (context, progress, _) {
+        return Container(
+          decoration: BoxDecoration(
+            gradient: _buildGradient(progress),
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: _SectionUnlockerPlaceholder(),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: _ZigzagPath(
+                          sections: flat.sections,
+                          nodes: flat.nodes,
+                          nodeKeys: _nodeKeys,
+                        ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      // child: Padding(
+                      //   padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+                      //   child: Column(
+                      //     children: [
+                      //       _GlassProfileSectionCard(controller: widget.profile),
+                      //     ],
+                      //   ),
+                      // ),
+                    ),
+                  ],
                 ),
-              ),
-              SliverToBoxAdapter(
-                // child: Padding(
-                //   padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
-                //   child: Column(
-                //     children: [
-                //       _GlassProfileSectionCard(controller: widget.profile),
-                //     ],
-                //   ),
-                // ),
               ),
             ],
           ),
-        ),
-      ],
+        );
+      },
     );
+  }
+
+  LinearGradient _buildGradient(double progress) {
+    // Desert (orange/gold) → Amber → Teal → Midnight blue
+    // Matches web: [0, 0.3, 0.6, 1] stops
+    if (progress < 0.3) {
+      final t = progress / 0.3;
+      return LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          _lerpColor(const Color(0xFFFF8C42), const Color(0xFFE8853E), t),
+          _lerpColor(const Color(0xFFF5A623), const Color(0xFFD47835), t),
+          _lerpColor(const Color(0xFFE8853E), const Color(0xFFB85C2B), t),
+        ],
+      );
+    } else if (progress < 0.6) {
+      final t = (progress - 0.3) / 0.3;
+      return LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          _lerpColor(const Color(0xFFE8853E), const Color(0xFF4A90A4), t),
+          _lerpColor(const Color(0xFFD47835), const Color(0xFF2D5A6B), t),
+          _lerpColor(const Color(0xFFB85C2B), const Color(0xFF1A3A4A), t),
+        ],
+      );
+    } else {
+      final t = ((progress - 0.6) / 0.4).clamp(0.0, 1.0);
+      return LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          _lerpColor(const Color(0xFF4A90A4), const Color(0xFF1A3A4A), t),
+          _lerpColor(const Color(0xFF2D5A6B), const Color(0xFF0D2832), t),
+          _lerpColor(const Color(0xFF1A3A4A), const Color(0xFF051A20), t),
+        ],
+      );
+    }
+  }
+
+  Color _lerpColor(Color a, Color b, double t) {
+    return Color.lerp(a, b, t)!;
   }
 }
 
@@ -403,44 +469,50 @@ class _SectionUnlockerPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
-        margin: const EdgeInsets.only(top: 24),
-        padding: const EdgeInsets.all(24),
-        constraints: const BoxConstraints(maxWidth: 400),
-        decoration: BoxDecoration(
-          color: _WebColors.card,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: _WebColors.border,
-            width: 2,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            margin: const EdgeInsets.only(top: 24),
+            padding: const EdgeInsets.all(24),
+            constraints: const BoxConstraints(maxWidth: 400),
+            decoration: BoxDecoration(
+              color: const Color(0x4DFFFFFF), // bg-white/30
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0x66FFFFFF), // border-white/40
+                width: 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.lock_outline_rounded,
+                  color: Colors.white70,
+                  size: 28,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Next Section Locked',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Complete the current section to unlock the next one.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              Icons.lock_outline_rounded,
-              color: _WebColors.mutedForeground,
-              size: 28,
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Next Section Locked',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: _WebColors.foreground,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Complete the current section to unlock the next one.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: _WebColors.mutedForeground,
-              ),
-            ),
-          ],
         ),
       ),
     );
