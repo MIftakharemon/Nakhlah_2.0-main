@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import '../../common/app_motion.dart';
 import '../../controllers/app_controller.dart';
-import '../challenges/challenges_view.dart';
+import '../../controllers/auth_controller.dart';
+// import '../challenges/challenges_view.dart';
 import '../gamification/gamification_view.dart';
 import '../home/home_view.dart';
 import '../leaderboard/leaderboard_view.dart';
@@ -17,10 +19,10 @@ class AppShellView extends StatelessWidget {
     final c = Get.find<AppController>();
     final pages = [
       const HomeView(),
-      const ChallengesView(),
       const LeaderboardView(),
       const GamificationView(),
       const ProfileView(),
+      const SizedBox.shrink(),
     ];
 
     return Obx(
@@ -48,68 +50,117 @@ class AppShellView extends StatelessWidget {
             child: pages[c.tabIndex.value],
           ),
         ),
-        bottomNavigationBar: Theme(
-          data: Theme.of(context).copyWith(
-            navigationBarTheme: NavigationBarThemeData(
-              indicatorColor: const Color(0xFFF4ECFF),
-              iconTheme: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return const IconThemeData(color: Color(0xFF7C3AED));
-                }
-                return const IconThemeData(color: Color(0xFF8B7E74));
-              }),
-              labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return const TextStyle(
-                    color: Color(0xFF7C3AED),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  );
-                }
-                return const TextStyle(
-                  color: Color(0xFF8B7E74),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                );
-              }),
-            ),
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: const BoxDecoration(
+            color: Colors.white,
           ),
-          child: NavigationBar(
-            selectedIndex: c.tabIndex.value,
-            onDestinationSelected: c.setTab,
-            animationDuration: AppMotion.normal,
-            backgroundColor: Colors.white,
-            surfaceTintColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            elevation: 0,
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _NavItem(
+                iconPath: 'assets/nakhlah_web/icons/Home-Icon.127e8555.svg',
                 label: 'Home',
+                isSelected: c.tabIndex.value == 0,
+                onTap: () => c.setTab(0),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.lock_open_outlined),
-                selectedIcon: Icon(Icons.lock_open),
-                label: 'Challenges',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.emoji_events_outlined),
-                selectedIcon: Icon(Icons.emoji_events),
+              _NavItem(
+                iconPath: 'assets/nakhlah_web/icons/LEADERBOARD.b7e283d4.svg',
                 label: 'Leaderboard',
+                isSelected: c.tabIndex.value == 1,
+                onTap: () => c.setTab(1),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.workspace_premium_outlined),
-                selectedIcon: Icon(Icons.workspace_premium),
+              _NavItem(
+                iconPath: 'assets/nakhlah_web/icons/STORE.9b24d09f.svg',
                 label: 'Store',
+                isSelected: c.tabIndex.value == 2,
+                onTap: () => c.setTab(2),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
+              _NavItem(
+                iconPath: 'assets/nakhlah_web/icons/Profile.f8f9b305.svg',
                 label: 'Profile',
+                isSelected: c.tabIndex.value == 3,
+                onTap: () => c.setTab(3),
+              ),
+              _NavItem(
+                iconPath: 'assets/nakhlah_web/icons/logout.125f3808.svg',
+                label: 'Logout',
+                isSelected: false,
+                onTap: _showLogoutDialog,
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    Get.defaultDialog(
+      title: 'Logout',
+      middleText: 'Are you sure you want to logout?',
+      textConfirm: 'Yes',
+      textCancel: 'No',
+      confirmTextColor: Colors.white,
+      onConfirm: () {
+        Get.back();
+        Get.find<AuthController>().logout();
+      },
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.iconPath,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String iconPath;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFFAF5FF)
+              : const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF7C3AED).withValues(alpha: 0.3)
+                : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              iconPath,
+              width: 24,
+              height: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected
+                    ? const Color(0xFF7C3AED)
+                    : const Color(0xFF6B7280),
+              ),
+            ),
+          ],
         ),
       ),
     );
