@@ -549,22 +549,20 @@ class _GlassStatsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
+      child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0x4DFFFFFF), // bg-white/30
-            borderRadius: BorderRadius.circular(0.5),
-            border: Border.all(
-              color: const Color(0x66FFFFFF), // border-white/40
-              width: 1,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF7D49DF), Color(0xFF5B2CB0)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.circular(14),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x14000000),
-                blurRadius: 8,
-                offset: Offset(0, 2),
+                color: Color(0x337D49DF),
+                blurRadius: 12,
+                offset: Offset(0, 4),
               ),
             ],
           ),
@@ -584,7 +582,6 @@ class _GlassStatsBar extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -712,8 +709,8 @@ class _HeaderIconValue extends StatelessWidget {
               const SizedBox(width: 7),
               Text(
                 '$value',
-                style: TextStyle(
-                  color: dc.textPrimary,
+                style: const TextStyle(
+                  color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                   height: 1,
