@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
@@ -17,9 +18,7 @@ class AppTheme {
     double fontSize = 34,
     FontWeight fontWeight = FontWeight.w900,
     Color color = AppColors.textPrimary,
-  }) => TextStyle(
-    fontFamily: arabicFontFamily,
-    fontFamilyFallback: const ['Scheherazade New', 'Noto Sans Arabic'],
+  }) => GoogleFonts.amiri(
     fontSize: fontSize,
     fontWeight: fontWeight,
     color: color,

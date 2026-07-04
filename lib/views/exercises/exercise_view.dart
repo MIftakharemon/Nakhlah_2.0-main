@@ -874,12 +874,10 @@ class _ExerciseViewState extends State<ExerciseView>
                     child: Text(
                       q.questionTitle,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTheme.arabicTextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: AppColors.textSecondary,
-                        height: 1.25,
-                        fontFamily: AppTheme.arabicFontFamily,
                       )),
                     ),
                 ],
@@ -1181,12 +1179,10 @@ class _ExerciseViewState extends State<ExerciseView>
             child: Center(
               child: Text(
                 previewWord,
-                style: const TextStyle(
+                style: AppTheme.arabicTextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
-                  fontFamily: AppTheme.arabicFontFamily,
-                  height: 1.4,
                 ),
               ),
             ),
@@ -1217,11 +1213,10 @@ class _ExerciseViewState extends State<ExerciseView>
                   ),
                   child: Text(
                     _selectedTokens[i].title,
-                    style: const TextStyle(
+                    style: AppTheme.arabicTextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
-                      fontFamily: AppTheme.arabicFontFamily,
                     ),
                   ),
                 ),
@@ -1889,10 +1884,9 @@ class _LetterTile extends StatelessWidget {
             border: Border.all(color: AppColors.border),
           ),
           child: Text(label,
-              style: const TextStyle(
+              style: AppTheme.arabicTextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
-                  fontFamily: AppTheme.arabicFontFamily,
                   color: AppColors.textPrimary)),
         ),
       ),

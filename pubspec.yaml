@@ -24,6 +24,7 @@ dependencies:
   google_sign_in: ^6.2.2
   just_audio: ^0.10.5
   fl_chart: ^0.70.2
+  google_fonts: ^8.1.0
 
 dev_dependencies:
   flutter_test:
