@@ -182,6 +182,7 @@ class AppShellView extends StatelessWidget {
   }
 }
 
+
 class _NavItem extends StatelessWidget {
   const _NavItem({
     required this.iconPath,
