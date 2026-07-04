@@ -19,6 +19,51 @@ import 'lesson_result_view.dart';
 const _lessonMaxWidth = 430.0;
 const _maxPalmTrees = 5;
 
+// ── Arabic diacritics helpers ───────────────────────────────────────────────
+
+String _stripArabicDiacritics(String value) {
+  return value.replaceAll(RegExp(r'[\u064B-\u065F\u0670]'), '');
+}
+
+String _buildDiacritizedPreview(String targetWord, String selectedWord) {
+  if (targetWord.isEmpty || selectedWord.isEmpty) return selectedWord;
+
+  final targetBase = _stripArabicDiacritics(targetWord).replaceAll(RegExp(r'\s+'), '');
+  final selectedBase = _stripArabicDiacritics(selectedWord).replaceAll(RegExp(r'\s+'), '');
+
+  if (!targetBase.startsWith(selectedBase)) return selectedWord;
+
+  int consumedBaseChars = 0;
+  final preview = StringBuffer();
+  final selectedBaseLength = selectedBase.length;
+
+  for (final char in targetWord.runes) {
+    final isDiacritic = (char >= 0x064B && char <= 0x065F) || char == 0x0670;
+    final isWhitespace = char <= 0x0020;
+
+    if (isDiacritic) {
+      if (consumedBaseChars > 0 && consumedBaseChars <= selectedBaseLength) {
+        preview.writeCharCode(char);
+      }
+      continue;
+    }
+
+    if (isWhitespace) {
+      if (consumedBaseChars > 0 && consumedBaseChars < selectedBaseLength) {
+        preview.writeCharCode(char);
+      }
+      continue;
+    }
+
+    if (consumedBaseChars >= selectedBaseLength) break;
+
+    preview.writeCharCode(char);
+    consumedBaseChars++;
+  }
+
+  return preview.isEmpty ? selectedWord : preview.toString();
+}
+
 class LessonEngineArgs {
   const LessonEngineArgs({
     required this.lessonId,
@@ -1041,6 +1086,17 @@ class _ExerciseViewState extends State<ExerciseView>
   Widget _buildTokenMakingQuestion(LessonQuestion q) {
     final sorted = q.sortedAnswers;
     final isSentence = q.questionType == 'sentence_making';
+
+    // Build diacritized preview for word_making
+    final selectedWord = _selectedTokens.map((t) => t.title).join('');
+    String previewWord = selectedWord;
+    if (!isSentence && selectedWord.isNotEmpty) {
+      final targetWord = q.correctAnswer?.title ?? q.learnAnswer;
+      if (targetWord.isNotEmpty) {
+        previewWord = _buildDiacritizedPreview(targetWord, selectedWord);
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
@@ -1058,7 +1114,7 @@ class _ExerciseViewState extends State<ExerciseView>
           const SizedBox(height: 24),
           Container(
             width: double.infinity,
-            constraints: const BoxConstraints(minHeight: 82),
+            constraints: const BoxConstraints(minHeight: 100),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.card,
@@ -1066,34 +1122,15 @@ class _ExerciseViewState extends State<ExerciseView>
               border: Border.all(
                 color: _questionAnswered
                     ? (_lastAnswerCorrect == true
-                    ? AppColors.correctGreen
-                    : AppColors.wrongRed)
+                        ? AppColors.correctGreen
+                        : AppColors.wrongRed)
                     : AppColors.accent,
                 width: 1.5,
               ),
             ),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  if (_selectedTokens.isEmpty)
-                    const Text('____',
-                        style: TextStyle(
-                            fontSize: 28,
-                            color: AppColors.textSecondary,
-                            fontFamily: AppTheme.arabicFontFamily)),
-                  for (var i = 0; i < _selectedTokens.length; i++)
-                    _LetterTile(
-                      label: _selectedTokens[i].title,
-                      active: true,
-                      onTap: _questionAnswered ? null : () => _removeToken(i),
-                    ),
-                ],
-              ),
-            ),
+            child: isSentence
+                ? _buildSentenceSelectedArea()
+                : _buildWordSelectedArea(previewWord),
           ),
           const SizedBox(height: 28),
           Directionality(
@@ -1107,13 +1144,136 @@ class _ExerciseViewState extends State<ExerciseView>
                     label: answer.title,
                     active: !_usedTokenIds.contains(answer.id),
                     onTap: _questionAnswered ||
-                        _usedTokenIds.contains(answer.id)
+                            _usedTokenIds.contains(answer.id)
                         ? null
                         : () => _addToken(answer),
                   ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWordSelectedArea(String previewWord) {
+    if (_selectedTokens.isEmpty) {
+      return const SizedBox(
+        height: 80,
+        child: Center(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text('',
+                style: TextStyle(fontSize: 32, color: AppColors.textSecondary)),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Large connected word preview
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: SizedBox(
+            height: 52,
+            child: Center(
+              child: Text(
+                previewWord,
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                  fontFamily: AppTheme.arabicFontFamily,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Small token chips
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: SizedBox(
+            height: 40,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              itemCount: _selectedTokens.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 6),
+              itemBuilder: (_, i) => GestureDetector(
+                onTap:
+                    _questionAnswered ? null : () => _removeToken(i),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    _selectedTokens[i].title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                      fontFamily: AppTheme.arabicFontFamily,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSentenceSelectedArea() {
+    if (_selectedTokens.isEmpty) {
+      return const SizedBox(
+        height: 80,
+        child: Center(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text('',
+                style: TextStyle(fontSize: 32, color: AppColors.textSecondary)),
+          ),
+        ),
+      );
+    }
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        alignment: WrapAlignment.center,
+        children: [
+          for (var i = 0; i < _selectedTokens.length; i++)
+            GestureDetector(
+              onTap: _questionAnswered ? null : () => _removeToken(i),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _selectedTokens[i].title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -1732,6 +1892,7 @@ class _LetterTile extends StatelessWidget {
               style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
+                  fontFamily: AppTheme.arabicFontFamily,
                   color: AppColors.textPrimary)),
         ),
       ),
