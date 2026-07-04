@@ -56,6 +56,8 @@ class _ExerciseViewState extends State<ExerciseView>
   bool _hasWrongAnswer = false;
   bool _questionAnswered = false;
   bool? _lastAnswerCorrect;
+  final Set<int> _skippedIndices = {};
+  bool _isRevisitingSkipped = false;
 
   String? _selectedOptionId;
   bool? _selectedTrueFalse;
@@ -273,11 +275,16 @@ class _ExerciseViewState extends State<ExerciseView>
 
     if (isCorrect) {
       _correctAnswers++;
+      _skippedIndices.remove(_currentIndex);
       _feedbackController.forward(from: 0);
       _playSfx('assets/audio/correct.mp3');
     } else {
       _hasWrongAnswer = true;
       _palmTrees--;
+      // During revisit, don't re-add to skipped — just attending is enough
+      if (!_isRevisitingSkipped) {
+        _skippedIndices.add(_currentIndex);
+      }
       _feedbackController.forward(from: 0);
       _reportWrongAnswer();
       _playSfx('assets/audio/wrong.mp3');
@@ -323,10 +330,68 @@ class _ExerciseViewState extends State<ExerciseView>
   }
 
   void _handleContinue() {
-    if (_isLastQuestion) {
+    // After answering wrong on current question (not in revisit mode)
+    // → advance forward normally, don't jump to skipped yet
+    if (_lastAnswerCorrect == false && !_isRevisitingSkipped) {
+      if (_isLastQuestion) {
+        // Reached end — now start revisiting skipped questions
+        if (_skippedIndices.isNotEmpty) {
+          _isRevisitingSkipped = true;
+          final nextSkipped = _skippedIndices.first;
+          _skippedIndices.remove(nextSkipped);
+          setState(() {
+            _currentIndex = nextSkipped;
+            _resetQuestionState();
+          });
+          _autoPlayAudio();
+          return;
+        }
+        _completeLesson();
+        return;
+      }
+      setState(() {
+        _currentIndex++;
+        _resetQuestionState();
+      });
+      _autoPlayAudio();
+      return;
+    }
+
+    // In revisit mode — jump to next skipped or complete
+    if (_isRevisitingSkipped) {
+      if (_skippedIndices.isNotEmpty) {
+        final nextSkipped = _skippedIndices.first;
+        _skippedIndices.remove(nextSkipped);
+        setState(() {
+          _currentIndex = nextSkipped;
+          _resetQuestionState();
+        });
+        _autoPlayAudio();
+        return;
+      }
+      _isRevisitingSkipped = false;
       _completeLesson();
       return;
     }
+
+    // Normal flow — if last question, start revisit or complete
+    if (_isLastQuestion) {
+      if (_skippedIndices.isNotEmpty) {
+        _isRevisitingSkipped = true;
+        final nextSkipped = _skippedIndices.first;
+        _skippedIndices.remove(nextSkipped);
+        setState(() {
+          _currentIndex = nextSkipped;
+          _resetQuestionState();
+        });
+        _autoPlayAudio();
+        return;
+      }
+      _completeLesson();
+      return;
+    }
+
+    // Normal mid-lesson: advance to next question (ignore skipped for now)
     setState(() {
       _currentIndex++;
       _resetQuestionState();
@@ -1182,6 +1247,7 @@ class _ExerciseViewState extends State<ExerciseView>
           _questionAnswered = true;
           _lastAnswerCorrect = true;
           _correctAnswers++;
+          _skippedIndices.remove(_currentIndex);
         });
         _feedbackController.forward(from: 0);
       }
@@ -1190,6 +1256,9 @@ class _ExerciseViewState extends State<ExerciseView>
         _pairPenaltyApplied = true;
         _hasWrongAnswer = true;
         _palmTrees--;
+        if (!_isRevisitingSkipped) {
+          _skippedIndices.add(_currentIndex);
+        }
         _reportWrongAnswer();
         _playSfx('assets/audio/wrong.mp3');
         if (_palmTrees <= 0) {
@@ -1369,12 +1438,12 @@ class _ExerciseViewState extends State<ExerciseView>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            SvgPicture.asset(
               isCorrect
-                  ? Icons.check_circle_rounded
-                  : Icons.cancel_rounded,
-              color: isCorrect ? AppColors.success : AppColors.error,
-              size: 20,
+                  ? 'assets/nakhlah_web/icons/Correct_answer.svg'
+                  : 'assets/nakhlah_web/icons/Wrong_answer.svg',
+              width: 28,
+              height: 28,
             ),
             const SizedBox(width: 8),
             Flexible(
@@ -1452,7 +1521,33 @@ class _ExerciseViewState extends State<ExerciseView>
           ),
           const SizedBox(height: 8),
           TextButton(
-            onPressed: _handleContinue,
+            onPressed: () {
+              if (!_questionAnswered) {
+                _skippedIndices.add(_currentIndex);
+                _hasWrongAnswer = true;
+              }
+              // Move forward normally, don't jump to skipped
+              if (_isLastQuestion) {
+                if (_skippedIndices.isNotEmpty) {
+                  _isRevisitingSkipped = true;
+                  final nextSkipped = _skippedIndices.first;
+                  _skippedIndices.remove(nextSkipped);
+                  setState(() {
+                    _currentIndex = nextSkipped;
+                    _resetQuestionState();
+                  });
+                  _autoPlayAudio();
+                } else {
+                  _completeLesson();
+                }
+              } else {
+                setState(() {
+                  _currentIndex++;
+                  _resetQuestionState();
+                });
+                _autoPlayAudio();
+              }
+            },
             child: const Text('Skip',
                 style: TextStyle(
                     decoration: TextDecoration.underline,
