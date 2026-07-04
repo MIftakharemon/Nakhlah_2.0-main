@@ -193,15 +193,18 @@ class _MainContent extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(0.5, 28, 0.5, 0.1),
-          child: _GlassStatsBar(
+          child: Obx(() => _GlassStatsBar(
             streak: gamification.streak.value.currentStreak,
             dates: gamification.stock.value.dateStock,
             palms: gamification.stock.value.palmStock,
             gamification: gamification,
-          ),
+          )),
         ),
         Expanded(
           child: Obx(() {
+            // Track profile changes so Obx rebuilds when profile loads
+            final _ = profile.profile.value?.currentProgress;
+
             if (content.loading.value && content.levels.isEmpty) {
               return const Padding(
                 padding: EdgeInsets.only(top: 96),
@@ -283,7 +286,14 @@ class _LearnDashboardState extends State<_LearnDashboard> {
   @override
   void didUpdateWidget(covariant _LearnDashboard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Re-scroll when profile data just arrived
     if (!_hasScrolledToResume) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _scrollToResumePosition();
+      });
+    } else if (widget.profile.profile.value != null &&
+        oldWidget.profile.profile.value == null) {
+      _hasScrolledToResume = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _scrollToResumePosition();
       });
@@ -293,6 +303,8 @@ class _LearnDashboardState extends State<_LearnDashboard> {
   void _scrollToResumePosition() {
     if (_hasScrolledToResume) return;
     if (widget.levels.isEmpty) return;
+    // Don't scroll until profile data is available
+    if (widget.profile.profile.value == null) return;
 
     final flat = _buildJourneyView(
       widget.levels,
