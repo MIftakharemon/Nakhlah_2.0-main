@@ -111,16 +111,12 @@ class AppShellView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: themeCtrl.isDarkMode.value
                     ? const Color(0xCC0F1419)
-                    : (c.tabIndex.value == 0
-                        ? const Color(0xD9F5E6D0).withOpacity(0.85)
-                        : Colors.white),
+                    : Colors.white,
                 border: Border(
                   top: BorderSide(
                     color: themeCtrl.isDarkMode.value
                         ? const Color(0xFF2C3544)
-                        : (c.tabIndex.value == 0
-                            ? const Color(0x33D4A574)
-                            : const Color(0xFFE5E5E5)),
+                        : const Color(0xFFE5E5E5),
                     width: 1,
                   ),
                 ),

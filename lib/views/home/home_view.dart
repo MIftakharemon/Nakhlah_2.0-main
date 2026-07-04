@@ -46,7 +46,7 @@ class _HomeViewState extends State<HomeView> {
     final gamification = Get.find<GamificationController>();
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: DarkModeColors.of(context).cardBackground,
       body: RefreshIndicator(
         color: const Color(0xFF7D49DF),
         onRefresh: () async {
@@ -382,20 +382,10 @@ class _LearnDashboardState extends State<_LearnDashboard> {
       _nodeKeys.putIfAbsent(node.apiId, () => GlobalKey());
     }
 
+    final bg = DarkModeColors.of(context).cardBackground;
     return Stack(
       children: [
-        // Background gradient — only this repaints on scroll
-        AnimatedBuilder(
-          animation: _scrollController,
-          builder: (context, _) {
-            final progress = _scrollProgress.value;
-            return Container(
-              decoration: BoxDecoration(
-                gradient: _buildGradient(progress),
-              ),
-            );
-          },
-        ),
+        ColoredBox(color: bg),
         // Scroll content — never rebuilds from scroll
         Column(
           children: [
@@ -1227,7 +1217,7 @@ void _showLessonChooserDialog(BuildContext context, String taskId) {
     barrierColor: Colors.black54,
     builder: (ctx) {
       return Dialog(
-        backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
         insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
         child: Container(
           constraints: const BoxConstraints(maxWidth: 420, maxHeight: 580),
