@@ -326,10 +326,6 @@ class _ExerciseViewState extends State<ExerciseView>
     } else {
       _hasWrongAnswer = true;
       _palmTrees--;
-      // During revisit, don't re-add to skipped — just attending is enough
-      if (!_isRevisitingSkipped) {
-        _skippedIndices.add(_currentIndex);
-      }
       _feedbackController.forward(from: 0);
       _reportWrongAnswer();
       _playSfx('assets/audio/wrong.mp3');
@@ -1411,9 +1407,6 @@ class _ExerciseViewState extends State<ExerciseView>
         _pairPenaltyApplied = true;
         _hasWrongAnswer = true;
         _palmTrees--;
-        if (!_isRevisitingSkipped) {
-          _skippedIndices.add(_currentIndex);
-        }
         _reportWrongAnswer();
         _playSfx('assets/audio/wrong.mp3');
         if (_palmTrees <= 0) {
