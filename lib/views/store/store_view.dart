@@ -328,15 +328,15 @@ class _StoreViewState extends State<StoreView> {
                                   ),
                                 ],
                               ),
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: Image.asset(
-                                  'assets/store/date_for_store.png',
-                                  width: 44,
-                                  height: 44,
-                                ),
+                            Positioned(
+                              top: 1,
+                              right: -100,
+                              child: Image.asset(
+                                'assets/store/date_for_store.png',
+                                width: 48,
+                                height: 48,
                               ),
+                            ),
                             ],
                           ),
                           const SizedBox(height: 12),
