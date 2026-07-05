@@ -10,10 +10,11 @@ import '../../controllers/app_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/theme_controller.dart';
 // import '../challenges/challenges_view.dart';
-import '../gamification/gamification_view.dart';
+// import '../gamification/gamification_view.dart'; // COMMENTED: replaced by StoreView
 import '../home/home_view.dart';
 import '../leaderboard/leaderboard_view.dart';
 import '../profile/profile_view.dart';
+import '../store/store_view.dart';
 
 class AppShellView extends StatelessWidget {
   const AppShellView({super.key});
@@ -25,7 +26,7 @@ class AppShellView extends StatelessWidget {
     final pages = [
       const HomeView(),
       const LeaderboardView(),
-      const GamificationView(),
+      const StoreView(),
       const ProfileView(),
       const SizedBox.shrink(),
     ];

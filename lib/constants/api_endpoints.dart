@@ -48,4 +48,13 @@ class ApiEndpoints {
   static String makeLearnerProgress(String id) => '/lessons/make-learner-progress/$id';
   static String restoreStreak(int days) => '/lessons/restore-streak/$days';
 
+  // Payment & Store
+  static const String datePackages = '/date-packages';
+  static const String subscriptionPlans = '/subscription-plans';
+  static const String createDatePaymentOrder = '/payments/dates/create-order';
+  static const String captureDatePaymentOrder = '/payments/dates/capture-order';
+  static const String createSubscriptionPayment = '/payments/subscriptions/create';
+  static const String currentSubscription = '/payments/me/subscription';
+  static String cancelSubscription(String id) => '/payments/subscriptions/cancel';
+
 }
