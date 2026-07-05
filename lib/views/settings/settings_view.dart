@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../constants/dark_mode_colors.dart';
+import '../../controllers/app_controller.dart';
 import '../../routes/app_routes.dart';
 import 'settings_detail_view.dart';
 
@@ -63,7 +64,10 @@ class _SettingsViewState extends State<SettingsView> {
             iconBgColor: const Color(0xFFEDE7F6),
             iconColor: const Color(0xFF7E57C2),
             title: 'Payment',
-            onTap: () => Get.toNamed(Routes.payment),
+            onTap: () {
+              Get.back(); // close settings
+              Get.find<AppController>().setTab(2); // navigate to Store tab
+            },
           ),
           _buildSettingItem(
             context: context,
