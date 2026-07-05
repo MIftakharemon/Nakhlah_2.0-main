@@ -1,9 +1,10 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/dark_mode_colors.dart';
-import '../../routes/app_routes.dart';
 import '../../services/api_service.dart';
 import '../../services/payment_service.dart';
 
@@ -20,11 +21,14 @@ class _StoreViewState extends State<StoreView> {
   Map<String, dynamic>? _currentSubscription;
   bool _isLoadingDates = true;
   int? _selectedDateIndex;
+  String? _processingId;
   String? _error;
+  late final PaymentService _paymentService;
 
   @override
   void initState() {
     super.initState();
+    _paymentService = PaymentService(Get.find<ApiService>());
     _loadData();
   }
 
@@ -82,14 +86,74 @@ class _StoreViewState extends State<StoreView> {
   }
 
   Future<void> _handleDateCheckout(Map<String, dynamic> pkg) async {
-    Get.toNamed(Routes.payment, arguments: {
-      'type': 'date',
-      'package': pkg,
-    });
+    final packageId = pkg['id']?.toString() ?? '';
+    developer.log('_handleDateCheckout: packageId=$packageId, pkg=$pkg', name: 'StoreView');
+    setState(() => _processingId = 'dates:$packageId');
+
+    try {
+      developer.log('calling createDatePaymentOrder...', name: 'StoreView');
+      final result = await _paymentService.createDatePaymentOrder(packageId);
+      developer.log('createDatePaymentOrder returned: $result', name: 'StoreView');
+
+      if (!mounted) return;
+
+      if (result['success'] != true) {
+        setState(() => _processingId = null);
+        final error = result['error'] ?? 'Unable to start PayPal checkout.';
+        developer.log('CHECKOUT FAILED: $error', name: 'StoreView');
+        Get.snackbar(
+          'Error',
+          error,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      final approvalUrl = result['approvalUrl'];
+      developer.log('approvalUrl from result: $approvalUrl', name: 'StoreView');
+      if (approvalUrl == null || approvalUrl.toString().isEmpty) {
+        setState(() => _processingId = null);
+        developer.log('NO APPROVAL URL - showing error', name: 'StoreView');
+        Get.snackbar(
+          'Error',
+          'No payment URL received from server.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      final url = Uri.parse(approvalUrl.toString());
+      developer.log('Launching URL: $url', name: 'StoreView');
+      final canLaunch = await canLaunchUrl(url);
+      developer.log('canLaunchUrl=$canLaunch', name: 'StoreView');
+      if (canLaunch) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+        developer.log('launchUrl succeeded', name: 'StoreView');
+      } else {
+        developer.log('canLaunchUrl returned false!', name: 'StoreView');
+        Get.snackbar(
+          'Error',
+          'Cannot open PayPal. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      developer.log('EXCEPTION in _handleDateCheckout: $e', name: 'StoreView');
+      if (mounted) {
+        Get.snackbar(
+          'Error',
+          'Something went wrong: $e',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _processingId = null);
+    }
   }
 
   Future<void> _handleSubscriptionCheckout(Map<String, dynamic> plan) async {
     final planId = plan['id']?.toString() ?? '';
+    developer.log('_handleSubscriptionCheckout: planId=$planId, plan=$plan', name: 'StoreView');
 
     // Check if user already has this plan
     if (_currentSubscription != null &&
@@ -103,10 +167,67 @@ class _StoreViewState extends State<StoreView> {
       return;
     }
 
-    Get.toNamed(Routes.payment, arguments: {
-      'type': 'subscription',
-      'plan': plan,
-    });
+    setState(() => _processingId = 'premium:$planId');
+
+    try {
+      developer.log('calling createSubscriptionPayment...', name: 'StoreView');
+      final result = await _paymentService.createSubscriptionPayment(planId);
+      developer.log('createSubscriptionPayment returned: $result', name: 'StoreView');
+
+      if (!mounted) return;
+
+      if (result['success'] != true) {
+        setState(() => _processingId = null);
+        final error = result['error'] ?? 'Unable to start PayPal subscription.';
+        developer.log('SUBSCRIPTION CHECKOUT FAILED: $error', name: 'StoreView');
+        Get.snackbar(
+          'Error',
+          error,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      final approvalUrl = result['approvalUrl'];
+      developer.log('approvalUrl from result: $approvalUrl', name: 'StoreView');
+      if (approvalUrl == null || approvalUrl.toString().isEmpty) {
+        setState(() => _processingId = null);
+        developer.log('NO APPROVAL URL - showing error', name: 'StoreView');
+        Get.snackbar(
+          'Error',
+          'No payment URL received from server.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      final url = Uri.parse(approvalUrl.toString());
+      developer.log('Launching URL: $url', name: 'StoreView');
+      final canLaunch = await canLaunchUrl(url);
+      developer.log('canLaunchUrl=$canLaunch', name: 'StoreView');
+      if (canLaunch) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+        developer.log('launchUrl succeeded', name: 'StoreView');
+      } else {
+        developer.log('canLaunchUrl returned false!', name: 'StoreView');
+        Get.snackbar(
+          'Error',
+          'Cannot open PayPal. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      developer.log('EXCEPTION in _handleSubscriptionCheckout: $e', name: 'StoreView');
+      if (mounted) {
+        Get.snackbar(
+          'Error',
+          'Something went wrong: $e',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _processingId = null);
+    }
   }
 
   @override
@@ -198,6 +319,8 @@ class _StoreViewState extends State<StoreView> {
         final label = pkg['name'] ?? pkg['label'] ?? 'DATE PACKAGE';
         final description = pkg['description'] ??
             'Get $amount Dates to keep learning without interruption.';
+        final packageId = pkg['id']?.toString() ?? '';
+        final isCheckingOut = _processingId == 'dates:$packageId';
 
         return GestureDetector(
           onTap: () {
@@ -335,10 +458,14 @@ class _StoreViewState extends State<StoreView> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () => _handleDateCheckout(pkg),
+                              onPressed: isCheckingOut
+                                  ? null
+                                  : () => _handleDateCheckout(pkg),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.accent,
                                 foregroundColor: Colors.white,
+                                disabledBackgroundColor:
+                                    AppColors.accent.withValues(alpha: 0.6),
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(
@@ -346,14 +473,23 @@ class _StoreViewState extends State<StoreView> {
                                 ),
                                 elevation: 0,
                               ),
-                              child: const Text(
-                                'GET DATES',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1,
-                                ),
-                              ),
+                              child: isCheckingOut
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'GET DATES',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
@@ -558,11 +694,13 @@ class _StoreViewState extends State<StoreView> {
     final isCurrentPlan = _currentSubscription != null &&
         _currentSubscription!['status'] != 'cancelled' &&
         _currentSubscription!['plan']?['id'] == planId;
+    final isCheckingOut = _processingId == 'premium:$planId';
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
         GestureDetector(
-          onTap: isCurrentPlan
+          onTap: isCurrentPlan || isCheckingOut
               ? null
               : () => _handleSubscriptionCheckout(plan),
           child: Container(
@@ -588,15 +726,24 @@ class _StoreViewState extends State<StoreView> {
                     color: isCurrentPlan ? AppColors.palm : AppColors.accent,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    isCurrentPlan ? 'Current' : 'Subscribe',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+                  child: isCheckingOut
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          isCurrentPlan ? 'Current' : 'Subscribe',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 10),
                 Text(
