@@ -107,6 +107,7 @@ class _ExerciseViewState extends State<ExerciseView>
   String? _selectedOptionId;
   bool? _selectedTrueFalse;
   String? _selectedFillBlankId;
+  String _selectedFillBlankText = '';
 
   final List<LessonAnswer> _selectedTokens = [];
   final Set<String> _usedTokenIds = {};
@@ -238,6 +239,7 @@ class _ExerciseViewState extends State<ExerciseView>
     _selectedOptionId = null;
     _selectedTrueFalse = null;
     _selectedFillBlankId = null;
+    _selectedFillBlankText = '';
     _selectedTokens.clear();
     _usedTokenIds.clear();
     _selectedLeftId = null;
@@ -1013,63 +1015,230 @@ class _ExerciseViewState extends State<ExerciseView>
   }
 
   // ─── FILL BLANK ────────────────────────────────────────────────────────
+
+  _FillBlankParts _parseFillBlankQuestion(String title) {
+    String instruction = '';
+    var sentence = title.trim();
+
+    final colonIndex = title.indexOf(':');
+    if (colonIndex != -1) {
+      instruction = title.substring(0, colonIndex + 1).trim();
+      sentence = title.substring(colonIndex + 1).trim();
+    } else {
+      if (!_isArabicText(title)) {
+        instruction = title;
+        sentence = '';
+      }
+    }
+
+    final blankPattern = RegExp(r'''(?:['"]?_+['"]?)|-{3,}|\.{3,}''');
+    final match = blankPattern.firstMatch(sentence);
+
+    if (match == null) {
+      return _FillBlankParts(
+        instruction: instruction,
+        before: sentence,
+        after: '',
+        hasBlank: false,
+      );
+    }
+
+    final raw = match[0]!.replaceAll(RegExp(r"""^['"]|['"]$"""), '');
+    final displayBlank = RegExp(r'^_+$').hasMatch(raw) ? '' : raw;
+
+    final before = sentence.substring(0, match.start).trim();
+    final after = sentence.substring(match.end).trim();
+
+    if (before.isEmpty) {
+      return _FillBlankParts(
+        instruction: instruction,
+        before: after,
+        after: '',
+        hasBlank: true,
+        blank: displayBlank,
+      );
+    }
+    if (after.isEmpty) {
+      return _FillBlankParts(
+        instruction: instruction,
+        before: before,
+        after: '',
+        hasBlank: true,
+        blank: displayBlank,
+      );
+    }
+
+    return _FillBlankParts(
+      instruction: instruction,
+      before: before,
+      after: after,
+      hasBlank: true,
+      blank: displayBlank,
+    );
+  }
+
   Widget _buildFillBlankQuestion(LessonQuestion q) {
-    final displayTitle = q.questionTitle
-        .replaceAll(RegExp(r'[_\-\.]{2,}'), '____');
+    final parts = _parseFillBlankQuestion(q.questionTitle);
+    final isArabic = _isArabicText(q.questionTitle);
+
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Question label with audio buttons (outside card, like web)
           _buildQuestionLabel('Fill in the blank'),
-          const SizedBox(height: 18),
-          Directionality(
-            textDirection: _isArabicText(q.questionTitle)
-                ? TextDirection.rtl
-                : TextDirection.ltr,
-            child: Text(
-              displayTitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: _isArabicText(q.questionTitle) ? 28 : 20,
-                fontWeight: FontWeight.w900,
-                color: AppColors.textPrimary,
-                height: 1.35,
-                fontFamily: _isArabicText(q.questionTitle)
-                    ? AppTheme.arabicFontFamily
-                    : null,
-              ),
+          const SizedBox(height: 16),
+
+          // Card container (web: bg-card border border-border rounded-xl p-4 sm:p-6)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(16),
             ),
-          ),
-          const SizedBox(height: 24),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 2.25,
+            child: Column(
+              children: [
+                // English instruction (web: text-lg font-bold text-center mb-4)
+                if (parts.instruction.isNotEmpty) ...[
+                  Text(
+                    parts.instruction,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                      fontFamily: isArabic ? AppTheme.arabicFontFamily : null,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Arabic sentence + blank slot (web: text-xl font-bold text-center leading-relaxed)
+                Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: [
+                      if (parts.before.isNotEmpty)
+                        Text(
+                          parts.before,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                            height: 1.4,
+                            fontFamily: AppTheme.arabicFontFamily,
+                          ),
+                        ),
+
+                      // Blank slot (web: w-[140px] h-[1.35em] border-b-2 border-foreground/40)
+                      Container(
+                        width: 140,
+                        height: 38,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: AppColors.textPrimary.withValues(alpha: 0.4),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 180),
+                          switchInCurve: Curves.easeOut,
+                          switchOutCurve: Curves.easeIn,
+                          transitionBuilder: (child, animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(0, 0.3),
+                                  end: Offset.zero,
+                                ).animate(animation),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: _selectedFillBlankText.isNotEmpty
+                              ? Text(
+                                  _selectedFillBlankText,
+                                  key: ValueKey(_selectedFillBlankText),
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                    fontFamily: AppTheme.arabicFontFamily,
+                                  ),
+                                )
+                              : Text(
+                                  '',
+                                  key: const ValueKey('blank'),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: AppColors.textSecondary.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                        ),
+                      ),
+
+                      if (parts.after.isNotEmpty)
+                        Text(
+                          parts.after,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                            height: 1.4,
+                            fontFamily: AppTheme.arabicFontFamily,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Options grid (web: grid grid-cols-2 gap-3 sm:gap-4)
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 2.0,
+                  children: List.generate(q.answers.length, (index) {
+                    final answer = q.answers[index];
+                    final isSelected = _selectedFillBlankId == answer.id;
+                    final isCorrectAnswer = answer.isCorrect == true;
+                    final showCorrect = _questionAnswered && isCorrectAnswer;
+                    final showWrong = _questionAnswered && isSelected && !isCorrectAnswer;
+                    return _FillBlankOption(
+                      text: answer.title,
+                      selected: isSelected,
+                      correct: showCorrect,
+                      wrong: showWrong,
+                      index: index,
+                      onTap: _questionAnswered
+                          ? null
+                          : () => setState(() {
+                                _selectedFillBlankId = answer.id;
+                                _selectedFillBlankText = answer.title;
+                              }),
+                    );
+                  }),
+                ),
+              ],
             ),
-            itemCount: q.answers.length,
-            itemBuilder: (context, index) {
-              final answer = q.answers[index];
-              final isSelected = _selectedFillBlankId == answer.id;
-              final isCorrectAnswer = answer.isCorrect == true;
-              final showCorrect = _questionAnswered && isCorrectAnswer;
-              final showWrong =
-                  _questionAnswered && isSelected && !isCorrectAnswer;
-              return _McqOption(
-                text: answer.title,
-                selected: isSelected,
-                correct: showCorrect,
-                wrong: showWrong,
-                onTap: _questionAnswered
-                    ? null
-                    : () =>
-                    setState(() => _selectedFillBlankId = answer.id),
-              );
-            },
           ),
         ],
       ),
@@ -1962,6 +2131,111 @@ class _MatchTile extends StatelessWidget {
                 fontWeight: FontWeight.w800,
                 color: foreground,
                 fontFamily: rtl ? AppTheme.arabicFontFamily : null,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FillBlankParts {
+  const _FillBlankParts({
+    required this.instruction,
+    required this.before,
+    required this.after,
+    this.hasBlank = false,
+    this.blank = '',
+  });
+
+  final String instruction;
+  final String before;
+  final String after;
+  final bool hasBlank;
+  final String blank;
+}
+
+class _FillBlankOption extends StatelessWidget {
+  const _FillBlankOption({
+    required this.text,
+    required this.selected,
+    required this.correct,
+    required this.wrong,
+    required this.index,
+    required this.onTap,
+  });
+
+  final String text;
+  final bool selected;
+  final bool correct;
+  final bool wrong;
+  final int index;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = wrong
+        ? AppColors.optionBgWrong
+        : correct
+            ? AppColors.optionBgCorrect
+            : selected
+                ? AppColors.accent.withValues(alpha: 0.1)
+                : AppColors.card;
+    final border = wrong
+        ? AppColors.optionBorderWrong
+        : correct
+            ? AppColors.optionBorderCorrect
+            : selected
+                ? AppColors.accent
+                : AppColors.border;
+
+    return AnimatedOpacity(
+      opacity: 1.0,
+      duration: Duration(milliseconds: 300 + (index * 100)),
+      child: AnimatedSlide(
+        offset: Offset.zero,
+        duration: Duration(milliseconds: 300 + (index * 100)),
+        curve: Curves.easeOut,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 80),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: color,
+              border: Border.all(
+                color: border,
+                width: selected || correct || wrong ? 2 : 1,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.accent.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: Text(
+                text,
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: wrong
+                      ? AppColors.optionBorderWrong
+                      : correct
+                          ? AppColors.optionBorderCorrect
+                          : AppColors.textPrimary,
+                  fontFamily: AppTheme.arabicFontFamily,
+                  height: 1.3,
+                ),
               ),
             ),
           ),
