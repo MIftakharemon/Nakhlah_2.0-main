@@ -13,6 +13,7 @@ import '../../common/loading_state.dart';
 import '../../common/responsive.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/dark_mode_colors.dart';
+import '../../controllers/app_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/gamification_controller.dart';
 import '../../controllers/profile_controller.dart';
@@ -61,8 +62,6 @@ class _ProfileViewState extends State<ProfileView> {
   Widget build(BuildContext context) {
     final dc = DarkModeColors.of(context);
     final p = Get.find<ProfileController>();
-    final a = Get.find<AuthController>();
-    final g = Get.find<GamificationController>();
 
     return Scaffold(
       backgroundColor: dc.cardBackground,
@@ -71,43 +70,51 @@ class _ProfileViewState extends State<ProfileView> {
           if (p.loading.value && p.profile.value == null) {
             return const LoadingState();
           }
+          final items = _buildProfileItems(context);
           return ListView(
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top + 16,
             ),
             children: [
-              for (var i = 0; i < 20; i++)
+              for (var i = 0; i < items.length; i++)
                 PageEnter(
                   delay: Duration(milliseconds: 30 * i),
                   duration: const Duration(milliseconds: 280),
-                  child: [
-                    _buildAppBar(context),
-                    const SizedBox(height: 20),
-                    _buildProfileHeader(context, p, a),
-                    const SizedBox(height: 20),
-                    _buildStatsRow(context, p, g),
-                    const SizedBox(height: 16),
-                    _buildActionButtons(context),
-                    const SizedBox(height: 28),
-                    _buildStatisticsSection(context, p, g),
-                    const SizedBox(height: 20),
-                    _buildXpChartSection(context),
-                    const SizedBox(height: 28),
-                    _buildAchievementsSection(context, g),
-                    const SizedBox(height: 24),
-                    _buildSubscriptionCard(context),
-                    const SizedBox(height: 24),
-                    _buildSettingsLinks(context),
-                    const SizedBox(height: 24),
-                    _buildLogoutButton(context, a),
-                    const SizedBox(height: 32),
-                  ][i],
+                  child: items[i],
                 ),
             ],
           );
         }),
       ),
     );
+  }
+
+  List<Widget> _buildProfileItems(BuildContext context) {
+    final p = Get.find<ProfileController>();
+    final a = Get.find<AuthController>();
+    final g = Get.find<GamificationController>();
+    return [
+      _buildAppBar(context),
+      const SizedBox(height: 20),
+      _buildProfileHeader(context, p, a),
+      const SizedBox(height: 20),
+      _buildStatsRow(context, p, g),
+      const SizedBox(height: 16),
+      _buildActionButtons(context),
+      const SizedBox(height: 28),
+      _buildStatisticsSection(context, p, g),
+      const SizedBox(height: 20),
+      // _buildXpChartSection(context), // COMMENTED: XP chart removed for now
+      const SizedBox(height: 28),
+      _buildAchievementsSection(context, g),
+      const SizedBox(height: 24),
+      _buildSubscriptionCard(context),
+      const SizedBox(height: 24),
+      _buildSettingsLinks(context),
+      const SizedBox(height: 24),
+      _buildLogoutButton(context, a),
+      const SizedBox(height: 32),
+    ];
   }
 
   Widget _buildAppBar(BuildContext context) {
@@ -530,7 +537,10 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 const SizedBox(height: 14),
                 ElevatedButton(
-                  onPressed: () => Get.toNamed(Routes.premium),
+                  onPressed: () {
+                    // OLD: Get.toNamed(Routes.premium);
+                    Get.find<AppController>().setTab(2); // Navigate to Store tab
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF7C3AED),
