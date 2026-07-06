@@ -628,15 +628,15 @@ class _ProfileViewState extends State<ProfileView> {
       ),
       child: Column(
         children: [
-          _buildSettingsLinkItem(
-            context: context,
-            icon: Icons.bar_chart,
-            iconBg: const Color(0xFFE3F2FD),
-            iconColor: const Color(0xFF42A5F5),
-            title: 'Stats',
-            onTap: () => Get.toNamed(Routes.stats),
-          ),
-          const Divider(height: 1, indent: 56),
+          // _buildSettingsLinkItem(
+          //   context: context,
+          //   icon: Icons.bar_chart,
+          //   iconBg: const Color(0xFFE3F2FD),
+          //   iconColor: const Color(0xFF42A5F5),
+          //   title: 'Stats',
+          //   onTap: () => Get.toNamed(Routes.stats),
+          // ),
+          // const Divider(height: 1, indent: 56),
           _buildSettingsLinkItem(
             context: context,
             icon: Icons.help_outline,
