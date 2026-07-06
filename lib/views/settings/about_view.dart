@@ -147,18 +147,24 @@ class _AboutViewState extends State<AboutView> {
                   title: 'Privacy Policy',
                   onTap: () => Get.toNamed(Routes.privacyPolicy),
                 ),
-                if (_websiteUrl.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  _buildLinkItem(
-                    dc: dc,
-                    icon: Icons.open_in_new,
-                    iconBg: const Color(0xFFF3E5F5),
-                    iconColor: const Color(0xFF9C27B0),
-                    title: 'Visit Our Website',
-                    onTap: () => _launchUrl(_websiteUrl),
-                    isExternal: true,
-                  ),
-                ],
+                const SizedBox(height: 10),
+                _buildLinkItem(
+                  dc: dc,
+                  icon: Icons.open_in_new,
+                  iconBg: const Color(0xFFF3E5F5),
+                  iconColor: const Color(0xFF9C27B0),
+                  title: 'Visit Our Website',
+                  onTap: () async {
+                    final uri = Uri(
+                      scheme: 'https',
+                      host: 'nakhlah-web-2-0.vercel.app',
+                      path: '/auth/login',
+                      queryParameters: {'from': '/'},
+                    );
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  },
+                  isExternal: true,
+                ),
                 const SizedBox(height: 32),
               ],
             ),
@@ -218,8 +224,6 @@ class _AboutViewState extends State<AboutView> {
 
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }
