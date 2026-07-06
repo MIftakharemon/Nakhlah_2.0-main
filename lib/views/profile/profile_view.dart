@@ -151,14 +151,6 @@ class _ProfileViewState extends State<ProfileView> {
           children: [
             IconButton(
               onPressed: () {
-                SharePlus.instance.share(
-                  ShareParams(text: 'Check out my progress on Nakhlah!'),
-                );
-              },
-              icon: Icon(Icons.send_outlined, color: dc.iconPrimary),
-            ),
-            IconButton(
-              onPressed: () {
                 Get.toNamed(Routes.settings);
               },
               icon: Icon(Icons.settings_outlined, color: dc.iconPrimary),
@@ -399,28 +391,10 @@ class _ProfileViewState extends State<ProfileView> {
     GamificationController g,
   ) {
     final dc = DarkModeColors.of(context);
-    final stats = [
-      _StatData(
-        icon: '🔥',
-        value: '${g.streak.value.currentStreak}',
-        label: 'Current Streak',
-      ),
-      _StatData(
-        icon: '📅',
-        value: '${p.progress.value.lessonOrder}',
-        label: 'Lessons Completed',
-      ),
-      _StatData(
-        icon: '⚡',
-        value: '${p.stock.value.injazStock}',
-        label: 'Total XP',
-      ),
-      _StatData(
-        icon: '🏅',
-        value: '${g.achievements.where((a) => a.achieved).length}',
-        label: 'Badges Earned',
-      ),
-    ];
+    final dca = p.profile.value?.dailyChallengeActivity;
+    final stock = p.stock.value;
+    final achievementsUnlocked = g.achievements.where((a) => a.achieved).length;
+    final badgesEarned = stock.badgesCount;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -435,66 +409,140 @@ class _ProfileViewState extends State<ProfileView> {
                 color: dc.textPrimary,
               ),
             ),
-            SizedBox(width: 8),
-            Text('📊', style: TextStyle(fontSize: 18)),
+            const SizedBox(width: 8),
+            SvgPicture.asset(
+              'assets/nakhlah_web/icons/bar_chart.svg',
+              width: 20,
+              height: 20,
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        GridView.builder(
+        GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.7,
-          ),
-          itemCount: stats.length,
-          itemBuilder: (context, index) {
-            final stat = stats[index];
-            return Container(
-              decoration: BoxDecoration(
-                color: dc.cardBackground,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: dc.border),
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.5,
+          children: [
+            _buildStatCard(
+              context,
+              SvgPicture.asset(
+                'assets/nakhlah_web/icons/active-streak.svg',
+                width: 24,
+                height: 24,
               ),
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      Text(stat.icon, style: const TextStyle(fontSize: 20)),
-                      const SizedBox(width: 8),
-                      Text(
-                        stat.value,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: dc.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 28),
-                    child: Text(
-                      stat.label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: dc.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
+              '${dca?.tasksCompleted ?? 0}',
+              'Tasks Completed Today',
+            ),
+            _buildStatCard(
+              context,
+              SvgPicture.asset(
+                'assets/nakhlah_web/icons/calendar.svg',
+                width: 24,
+                height: 24,
               ),
-            );
-          },
+              '${dca?.lessonsCompleted ?? 0}',
+              'Lessons Completed Today',
+            ),
+            _buildStatCard(
+              context,
+              SvgPicture.asset(
+                'assets/nakhlah_web/icons/dates.svg',
+                width: 24,
+                height: 24,
+              ),
+              '${stock.dateStock}',
+              'Total Dates',
+            ),
+            _buildStatCard(
+              context,
+              SvgPicture.asset(
+                'assets/nakhlah_web/icons/star.svg',
+                width: 24,
+                height: 24,
+              ),
+              _formatNumber(stock.injazStock),
+              'Total Injaz Gained',
+            ),
+            _buildStatCard(
+              context,
+              SvgPicture.asset(
+                'assets/nakhlah_web/icons/bullseye.svg',
+                width: 24,
+                height: 24,
+              ),
+              '$achievementsUnlocked',
+              'Achievements Unlocked',
+            ),
+            _buildStatCard(
+              context,
+              SvgPicture.asset(
+                'assets/nakhlah_web/icons/medal.svg',
+                width: 24,
+                height: 24,
+              ),
+              '$badgesEarned',
+              'Badges Earned',
+            ),
+          ],
         ),
       ],
     );
+  }
+
+  Widget _buildStatCard(
+    BuildContext context,
+    Widget icon,
+    String value,
+    String label,
+  ) {
+    final dc = DarkModeColors.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: dc.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: dc.border),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          icon,
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: dc.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: dc.textSecondary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatNumber(int value) {
+    final str = value.toString();
+    final buf = StringBuffer();
+    for (var i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 == 0) buf.write(',');
+      buf.write(str[i]);
+    }
+    return buf.toString();
   }
 
   Widget _buildSubscriptionCard(BuildContext context) {
@@ -982,17 +1030,6 @@ class _ProfileViewState extends State<ProfileView> {
     ];
     return icons[id.hashCode.abs() % icons.length];
   }
-}
-
-class _StatData {
-  final String icon;
-  final String value;
-  final String label;
-  const _StatData({
-    required this.icon,
-    required this.value,
-    required this.label,
-  });
 }
 
 class _GamificationStat {

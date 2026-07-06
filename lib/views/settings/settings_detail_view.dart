@@ -65,7 +65,7 @@ class _SettingsDetailViewState extends State<SettingsDetailView> {
         ),
         centerTitle: false,
       ),
-      body: PageShell(child: _body(context)),
+      body: PageShell(animate: false, child: _body(context)),
     );
   }
 

@@ -303,9 +303,18 @@ class GamificationStock {
     this.palmStock = 0,
     this.dateStock = 0,
     this.injazStock = 0,
+    this.badges,
   });
 
   final int palmStock, dateStock, injazStock;
+  final dynamic badges;
+
+  int get badgesCount {
+    if (badges == null) return 0;
+    if (badges is List) return badges.length;
+    if (badges is Map) return badges.length;
+    return 0;
+  }
 
   factory GamificationStock.fromJson(dynamic value) {
     final j = _map(_unwrap(value));
@@ -315,6 +324,25 @@ class GamificationStock {
       palmStock: palm == null ? _int(j['palmStock']) : _int(palm['palmStock']),
       dateStock: _int(j['dateStock']),
       injazStock: _int(j['injazStock'] ?? j['injazCount']),
+      badges: j['badges'],
+    );
+  }
+}
+
+class DailyChallengeActivity {
+  const DailyChallengeActivity({
+    this.tasksCompleted = 0,
+    this.lessonsCompleted = 0,
+  });
+
+  final int tasksCompleted, lessonsCompleted;
+
+  factory DailyChallengeActivity.fromJson(dynamic value) {
+    final j = _map(_unwrap(value));
+    if (j == null) return const DailyChallengeActivity();
+    return DailyChallengeActivity(
+      tasksCompleted: _int(j['tasksCompleted']),
+      lessonsCompleted: _int(j['lessonsCompleted']),
     );
   }
 }
@@ -329,6 +357,7 @@ class UserProfileModel {
     this.onboardInfo = const OnboardInfo(),
     this.currentProgress = const ProgressModel(),
     this.stock = const GamificationStock(),
+    this.dailyChallengeActivity = const DailyChallengeActivity(),
   });
 
   final String? id, fullName, contactNumber, email;
@@ -336,6 +365,7 @@ class UserProfileModel {
   final OnboardInfo onboardInfo;
   final ProgressModel currentProgress;
   final GamificationStock stock;
+  final DailyChallengeActivity dailyChallengeActivity;
 
   factory UserProfileModel.fromJson(dynamic value) {
     final j = _map(_unwrap(value));
@@ -353,6 +383,9 @@ class UserProfileModel {
         j['currentProgress'] ?? j['learnerProgress'],
       ),
       stock: GamificationStock.fromJson(j['gamificationStock'] ?? j['stock']),
+      dailyChallengeActivity: DailyChallengeActivity.fromJson(
+        j['dailyChallengeActivity'],
+      ),
     );
   }
 }
