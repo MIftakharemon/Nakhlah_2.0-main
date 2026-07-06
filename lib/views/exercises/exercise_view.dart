@@ -192,6 +192,7 @@ class _ExerciseViewState extends State<ExerciseView>
 
       setState(() {
         _questions = questions;
+        _shuffleAllAnswers();
         _loading = false;
         _currentIndex = 0;
         final gamCtrl = Get.find<GamificationController>();
@@ -250,6 +251,24 @@ class _ExerciseViewState extends State<ExerciseView>
     _wrongLeftId = null;
     _wrongRightId = null;
     _shuffleRightItems();
+  }
+
+  void _shuffleAllAnswers() {
+    for (var i = 0; i < _questions.length; i++) {
+      final q = _questions[i];
+      if (q.isMcq || q.isTrueFalse || q.isFillBlank) {
+        final shuffled = [...q.answers]..shuffle();
+        _questions[i] = LessonQuestion(
+          id: q.id,
+          questionType: q.questionType,
+          questionTitle: q.questionTitle,
+          questionMedia: q.questionMedia,
+          answers: shuffled,
+          learnAnswer: q.learnAnswer,
+          trueFalseAnswer: q.trueFalseAnswer,
+        );
+      }
+    }
   }
 
   void _shuffleRightItems() {
