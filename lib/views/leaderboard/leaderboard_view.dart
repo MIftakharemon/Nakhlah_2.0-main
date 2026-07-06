@@ -131,23 +131,6 @@ class _LeaderboardList extends StatelessWidget {
                       size: 22,
                     ),
                   ),
-                  const Spacer(),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: Icon(
-                        Icons.search_rounded,
-                        color: AppColors.muted,
-                        size: 22,
-                      ),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 32),
