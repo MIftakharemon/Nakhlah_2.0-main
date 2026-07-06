@@ -98,8 +98,8 @@ class _ProfileViewState extends State<ProfileView> {
       const SizedBox(height: 20),
       _buildProfileHeader(context, p, a),
       const SizedBox(height: 20),
-      _buildStatsRow(context, p, g),
-      const SizedBox(height: 16),
+      // _buildStatsRow(context, p, g), // COMMENTED: Palm Trees, Dates, Gems, Injaz cards removed (was below name)
+      // const SizedBox(height: 16),     // COMMENTED: spacing for removed stats row
       _buildActionButtons(context),
       const SizedBox(height: 28),
       _buildStatisticsSection(context, p, g),
@@ -262,48 +262,50 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildStatsRow(
-    BuildContext context,
-    ProfileController p,
-    GamificationController g,
-  ) {
-    final stats = [
-      _GamificationStat(
-        icon: SvgPicture.asset(
-          'assets/nakhlah_design/Palm_Trees.svg',
-          width: 22,
-          height: 22,
-        ),
-        value: '${p.stock.value.palmStock}',
-        label: 'Palm Trees',
-        color: const Color(0xFF10B981),
-      ),
-      _GamificationStat(
-        icon: const Icon(Icons.circle, color: Color(0xFFF59E0B), size: 22),
-        value: '${p.stock.value.dateStock}',
-        label: 'Dates',
-        color: const Color(0xFFF59E0B),
-      ),
-      _GamificationStat(
-        icon: const Icon(Icons.diamond, color: Color(0xFF7C3AED), size: 22),
-        value: '${g.stock.value.injazStock}',
-        label: 'Gems',
-        color: const Color(0xFF7C3AED),
-      ),
-      _GamificationStat(
-        icon: const Icon(Icons.star, color: Color(0xFF3B82F6), size: 22),
-        value: '${p.stock.value.injazStock}',
-        label: 'Injaz',
-        color: const Color(0xFF3B82F6),
-      ),
-    ];
-
-    return Row(
-      children: stats
-          .map((s) => Expanded(child: _buildGamificationStatCard(s)))
-          .toList(),
-    );
-  }
+  // COMMENTED: Palm Trees, Dates, Gems, Injaz cards removed
+  // To restore, uncomment this method and the call in _buildBodyItems
+  // Widget _buildStatsRow(
+  //   BuildContext context,
+  //   ProfileController p,
+  //   GamificationController g,
+  // ) {
+  //   final stats = [
+  //     _GamificationStat(
+  //       icon: SvgPicture.asset(
+  //         'assets/nakhlah_design/Palm_Trees.svg',
+  //         width: 22,
+  //         height: 22,
+  //       ),
+  //       value: '${p.stock.value.palmStock}',
+  //       label: 'Palm Trees',
+  //       color: const Color(0xFF10B981),
+  //     ),
+  //     _GamificationStat(
+  //       icon: const Icon(Icons.circle, color: Color(0xFFF59E0B), size: 22),
+  //       value: '${p.stock.value.dateStock}',
+  //       label: 'Dates',
+  //       color: const Color(0xFFF59E0B),
+  //     ),
+  //     _GamificationStat(
+  //       icon: const Icon(Icons.diamond, color: Color(0xFF7C3AED), size: 22),
+  //       value: '${g.stock.value.injazStock}',
+  //       label: 'Gems',
+  //       color: const Color(0xFF7C3AED),
+  //     ),
+  //     _GamificationStat(
+  //       icon: const Icon(Icons.star, color: Color(0xFF3B82F6), size: 22),
+  //       value: '${p.stock.value.injazStock}',
+  //       label: 'Injaz',
+  //       color: const Color(0xFF3B82F6),
+  //     ),
+  //   ];
+  //
+  //   return Row(
+  //     children: stats
+  //         .map((s) => Expanded(child: _buildGamificationStatCard(s)))
+  //         .toList(),
+  //   );
+  // }
 
   Widget _buildGamificationStatCard(_GamificationStat stat) {
     final dc = DarkModeColors.of(context);
