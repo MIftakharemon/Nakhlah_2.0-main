@@ -5,14 +5,14 @@ import '../../constants/dark_mode_colors.dart';
 import '../../common/loading_state.dart';
 import '../../services/cms_service.dart';
 
-class TermsView extends StatefulWidget {
-  const TermsView({super.key});
+class PrivacyPolicyView extends StatefulWidget {
+  const PrivacyPolicyView({super.key});
 
   @override
-  State<TermsView> createState() => _TermsViewState();
+  State<PrivacyPolicyView> createState() => _PrivacyPolicyViewState();
 }
 
-class _TermsViewState extends State<TermsView> {
+class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
   bool _loading = true;
   String _content = '';
 
@@ -25,10 +25,10 @@ class _TermsViewState extends State<TermsView> {
   Future<void> _load() async {
     try {
       final service = Get.find<CmsService>();
-      final terms = await service.termsAndConditions();
+      final privacy = await service.privacyPolicy();
       if (mounted) {
         setState(() {
-          _content = terms;
+          _content = privacy;
           _loading = false;
         });
       }
@@ -55,18 +55,18 @@ class _TermsViewState extends State<TermsView> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD),
+                color: const Color(0xFFE8F5E9),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
-                Icons.description_outlined,
-                color: Color(0xFF42A5F5),
+                Icons.privacy_tip_outlined,
+                color: Color(0xFF66BB6A),
                 size: 18,
               ),
             ),
             const SizedBox(width: 12),
             Text(
-              'Terms & Conditions',
+              'Privacy Policy',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,

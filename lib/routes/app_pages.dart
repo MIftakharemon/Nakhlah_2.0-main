@@ -27,6 +27,7 @@ import '../views/settings/help_center_view.dart';
 import '../views/settings/legal_view.dart';
 import '../views/settings/settings_view.dart';
 import '../views/settings/terms_view.dart';
+import '../views/settings/privacy_policy_view.dart';
 import '../views/profile/stats_view.dart';
 import 'app_routes.dart';
 import 'game_page_transition.dart';
@@ -79,6 +80,7 @@ class AppPages {
     _page(Routes.challenges, () => const ChallengesView()),
     _page(Routes.faq, () => const FaqView()),
     _page(Routes.terms, () => const TermsView()),
+    _page(Routes.privacyPolicy, () => const PrivacyPolicyView()),
     _page(Routes.stats, () => const StatsView()),
     _page(Routes.contact, () => const ContactView()),
   ];

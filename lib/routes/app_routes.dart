@@ -25,6 +25,7 @@ class Routes {
   static const challenges = '/challenges';
   static const faq = '/faq';
   static const terms = '/terms';
+  static const privacyPolicy = '/privacy-policy';
   static const stats = '/stats';
   static const contact = '/contact';
 

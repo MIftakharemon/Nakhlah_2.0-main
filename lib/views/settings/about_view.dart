@@ -137,7 +137,7 @@ class _AboutViewState extends State<AboutView> {
                   iconBg: const Color(0xFFE8F5E9),
                   iconColor: const Color(0xFF66BB6A),
                   title: 'Privacy Policy',
-                  onTap: () => Get.toNamed(Routes.terms),
+                  onTap: () => Get.toNamed(Routes.privacyPolicy),
                 ),
                 if (_websiteUrl.isNotEmpty) ...[
                   const SizedBox(height: 10),
