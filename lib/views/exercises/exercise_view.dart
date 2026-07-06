@@ -1859,7 +1859,10 @@ class _ExerciseViewState extends State<ExerciseView>
           TextButton(
             onPressed: () {
               if (!_questionAnswered) {
-                _skippedIndices.add(_currentIndex);
+                // Only skip answer questions (not learn questions)
+                if (!_currentQuestion.isLearn) {
+                  _skippedIndices.add(_currentIndex);
+                }
                 _hasWrongAnswer = true;
               }
               // Move forward normally, don't jump to skipped
