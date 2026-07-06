@@ -64,7 +64,7 @@ class _ProfileViewState extends State<ProfileView> {
     final p = Get.find<ProfileController>();
 
     return Scaffold(
-      backgroundColor: dc.cardBackground,
+      backgroundColor: dc.scaffoldBackground,
       body: PageShell(
         child: Obx(() {
           if (p.loading.value && p.profile.value == null) {
