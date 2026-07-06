@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../common/lexical_renderer.dart';
 import '../../constants/dark_mode_colors.dart';
 import '../../common/loading_state.dart';
 import '../../services/cms_service.dart';
@@ -14,7 +15,7 @@ class PrivacyPolicyView extends StatefulWidget {
 
 class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
   bool _loading = true;
-  String _content = '';
+  dynamic _content;
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
   Future<void> _load() async {
     try {
       final service = Get.find<CmsService>();
-      final privacy = await service.privacyPolicy();
+      final privacy = await service.privacyPolicyLexical();
       if (mounted) {
         setState(() {
           _content = privacy;
@@ -79,7 +80,7 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
       ),
       body: _loading
           ? const LoadingState()
-          : _content.isEmpty
+          : _content == null
               ? Center(
                   child: Text(
                     'No content available at the moment.',
@@ -90,12 +91,19 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
                     const SizedBox(height: 8),
-                    Text(
-                      _content,
+                    DefaultTextStyle(
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.7,
                         color: dc.textSecondary,
+                      ),
+                      child: LexicalRenderer(
+                        data: _content,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.7,
+                          color: dc.textSecondary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 32),

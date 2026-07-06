@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../common/lexical_renderer.dart';
 import '../../constants/dark_mode_colors.dart';
 import '../../common/loading_state.dart';
 import '../../routes/app_routes.dart';
@@ -17,7 +18,7 @@ class AboutView extends StatefulWidget {
 
 class _AboutViewState extends State<AboutView> {
   bool _loading = true;
-  String _content = '';
+  dynamic _aboutLexical;
   String _websiteUrl = '';
 
   @override
@@ -30,12 +31,12 @@ class _AboutViewState extends State<AboutView> {
     try {
       final service = Get.find<CmsService>();
       final results = await Future.wait([
-        service.about(),
+        service.aboutLexical(),
         service.aboutData(),
       ]);
       if (mounted) {
         setState(() {
-          _content = results[0] as String;
+          _aboutLexical = results[0];
           final data = results[1] as Map<String, dynamic>?;
           _websiteUrl = data?['websiteUrl']?.toString() ?? '';
           _loading = false;
@@ -103,7 +104,7 @@ class _AboutViewState extends State<AboutView> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                if (_content.isNotEmpty)
+                if (_aboutLexical != null)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -112,12 +113,19 @@ class _AboutViewState extends State<AboutView> {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: dc.border),
                     ),
-                    child: Text(
-                      _content,
+                    child: DefaultTextStyle(
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.6,
                         color: dc.textSecondary,
+                      ),
+                      child: LexicalRenderer(
+                        data: _aboutLexical,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.6,
+                          color: dc.textSecondary,
+                        ),
                       ),
                     ),
                   ),

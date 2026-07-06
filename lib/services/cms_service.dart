@@ -39,6 +39,27 @@ class CmsService {
     return TextBlock.extract(r is Map ? r['about'] : r);
   }
 
+  Future<dynamic> aboutLexical() async {
+    final r = await _api.get(ApiEndpoints.about);
+    return r is Map ? r['about'] : null;
+  }
+
+  Future<dynamic> termsAndConditionsLexical() async {
+    final r = await _api.get(ApiEndpoints.legalDocuments);
+    if (r is Map && r['termsAndConditions'] != null) {
+      return r['termsAndConditions'];
+    }
+    return null;
+  }
+
+  Future<dynamic> privacyPolicyLexical() async {
+    final r = await _api.get(ApiEndpoints.legalDocuments);
+    if (r is Map && r['privacyPolicy'] != null) {
+      return r['privacyPolicy'];
+    }
+    return null;
+  }
+
   Future<String> termsAndConditions() async {
     final r = await _api.get(ApiEndpoints.legalDocuments);
     if (r is Map && r['termsAndConditions'] != null) {

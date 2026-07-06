@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../common/lexical_renderer.dart';
 import '../../constants/dark_mode_colors.dart';
 import '../../common/loading_state.dart';
 import '../../services/cms_service.dart';
@@ -14,7 +15,7 @@ class TermsView extends StatefulWidget {
 
 class _TermsViewState extends State<TermsView> {
   bool _loading = true;
-  String _content = '';
+  dynamic _content;
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _TermsViewState extends State<TermsView> {
   Future<void> _load() async {
     try {
       final service = Get.find<CmsService>();
-      final terms = await service.termsAndConditions();
+      final terms = await service.termsAndConditionsLexical();
       if (mounted) {
         setState(() {
           _content = terms;
@@ -79,7 +80,7 @@ class _TermsViewState extends State<TermsView> {
       ),
       body: _loading
           ? const LoadingState()
-          : _content.isEmpty
+          : _content == null
               ? Center(
                   child: Text(
                     'No content available at the moment.',
@@ -90,12 +91,19 @@ class _TermsViewState extends State<TermsView> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
                     const SizedBox(height: 8),
-                    Text(
-                      _content,
+                    DefaultTextStyle(
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.7,
                         color: dc.textSecondary,
+                      ),
+                      child: LexicalRenderer(
+                        data: _content,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.7,
+                          color: dc.textSecondary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 32),
