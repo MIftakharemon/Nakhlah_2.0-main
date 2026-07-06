@@ -88,7 +88,6 @@ class ProfileController extends GetxController {
         picture: picture,
       );
       await load();
-      AppSnackbar.success('Profile updated.');
       return true;
     } catch (e) {
       AppSnackbar.error(e.toString());

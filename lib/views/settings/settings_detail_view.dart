@@ -1,12 +1,18 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../common/app_button.dart';
 import '../../common/app_snackbar.dart';
 import '../../common/responsive.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/dark_mode_colors.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/profile_controller.dart';
+import '../../models/models.dart';
 
 class SettingsDetailView extends StatefulWidget {
   const SettingsDetailView({super.key, required this.title});
@@ -22,6 +28,27 @@ class _SettingsDetailViewState extends State<SettingsDetailView> {
   final _phone = TextEditingController();
   final _currentPassword = TextEditingController();
   final _newPassword = TextEditingController();
+  final _dob = TextEditingController();
+
+  File? _pickedFile;
+  String _country = '';
+  int _pictureVersion = 0;
+
+  static const _countries = [
+    'United States',
+    'United Kingdom',
+    'Canada',
+    'Australia',
+    'Bangladesh',
+  ];
+
+  List<String> get _allCountries {
+    final list = List<String>.from(_countries);
+    if (_country.isNotEmpty && !list.contains(_country)) {
+      list.insert(0, _country);
+    }
+    return list;
+  }
 
   @override
   void initState() {
@@ -29,6 +56,7 @@ class _SettingsDetailViewState extends State<SettingsDetailView> {
     final p = Get.find<ProfileController>();
     _name.text = p.profile.value?.fullName ?? '';
     _phone.text = p.profile.value?.contactNumber ?? '';
+    _country = p.profile.value?.onboardInfo.country ?? '';
   }
 
   @override
@@ -37,30 +65,28 @@ class _SettingsDetailViewState extends State<SettingsDetailView> {
     _phone.dispose();
     _currentPassword.dispose();
     _newPassword.dispose();
+    _dob.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F7F2),
+      backgroundColor: dc.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F7F2),
+        backgroundColor: dc.scaffoldBackground,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: AppColors.ink,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios, color: dc.iconPrimary, size: 20),
         ),
         title: Text(
           widget.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: AppColors.ink,
+            color: dc.textPrimary,
           ),
         ),
         centerTitle: false,
@@ -123,42 +149,273 @@ class _SettingsDetailViewState extends State<SettingsDetailView> {
 
   Widget _personalInfo() {
     final p = Get.find<ProfileController>();
+    final dc = DarkModeColors.of(context);
+    final profile = p.profile.value;
+    final email = Get.find<AuthController>().user.value?.email ?? profile?.email ?? '';
+
+    String? imageUrl = profile?.profilePicture?.absoluteUrl;
+    if (imageUrl != null && imageUrl.isNotEmpty && _pictureVersion > 0) {
+      imageUrl = '$imageUrl?v=$_pictureVersion';
+    }
+
+    final nameWords =
+        (profile?.fullName ?? '').trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    final initials =
+        nameWords.isEmpty ? '?' : nameWords.take(2).map((e) => e[0].toUpperCase()).join();
+
     return Obx(
       () => ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         children: [
-          TextField(
-            controller: _name,
-            decoration: const InputDecoration(
-              labelText: 'Full name',
-              prefixIcon: Icon(Icons.person_outline),
+          const SizedBox(height: 8),
+          Center(
+            child: GestureDetector(
+              onTap: _pickProfilePhoto,
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: dc.cardBackground, width: 4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 52,
+                      backgroundColor: const Color(0xFFF3E8FF),
+                      backgroundImage: _pickedFile != null
+                          ? FileImage(_pickedFile!)
+                          : (imageUrl != null
+                              ? CachedNetworkImageProvider(imageUrl)
+                              : null),
+                      child: (_pickedFile == null && imageUrl == null)
+                          ? Text(
+                              initials,
+                              style: const TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.accent,
+                              ),
+                            )
+                          : null,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 4,
+                    right: 4,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: dc.cardBackground, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 14),
-          TextField(
-            controller: _phone,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              labelText: 'Contact number',
-              prefixIcon: Icon(Icons.phone_outlined),
-            ),
+          const SizedBox(height: 32),
+          _buildLabel('Full Name', dc),
+          const SizedBox(height: 8),
+          _buildTextField(
+            controller: _name,
+            hint: 'Enter your full name',
+            dc: dc,
           ),
           const SizedBox(height: 20),
-          AppButton(
-            label: 'Save changes',
-            loading: p.loading.value,
-            onPressed: () async {
-              final ok = await p.updateProfile(
-                fullName: _name.text.trim().isEmpty ? null : _name.text.trim(),
-                contactNumber: _phone.text.trim().isEmpty
-                    ? null
-                    : _phone.text.trim(),
-              );
-              if (ok) Get.back();
-            },
+          _buildLabel('Phone Number', dc),
+          const SizedBox(height: 8),
+          _buildTextField(
+            controller: _phone,
+            hint: 'Enter your phone number',
+            keyboardType: TextInputType.phone,
+            dc: dc,
           ),
+          const SizedBox(height: 20),
+          _buildLabel('Email', dc),
+          const SizedBox(height: 8),
+          _buildTextField(
+            controller: TextEditingController(text: email),
+            hint: 'Email',
+            dc: dc,
+            readOnly: true,
+          ),
+          const SizedBox(height: 20),
+          _buildLabel('Date of Birth', dc),
+          const SizedBox(height: 8),
+          _buildTextField(
+            controller: _dob,
+            hint: 'Select date of birth',
+            dc: dc,
+            readOnly: true,
+            suffixIcon: Icon(Icons.calendar_today_outlined, color: dc.iconSecondary, size: 20),
+            onTap: _pickDate,
+          ),
+          const SizedBox(height: 20),
+          _buildLabel('Country', dc),
+          const SizedBox(height: 8),
+          _buildCountryDropdown(dc),
+          const SizedBox(height: 32),
+          AppButton(
+            label: 'Update Profile',
+            loading: p.loading.value,
+            onPressed: _updateProfile,
+          ),
+          const SizedBox(height: 32),
         ],
       ),
     );
+  }
+
+  Widget _buildLabel(String text, DarkModeColors dc) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: dc.textSecondary,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required DarkModeColors dc,
+    TextInputType? keyboardType,
+    bool readOnly = false,
+    Widget? suffixIcon,
+    VoidCallback? onTap,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      readOnly: readOnly,
+      onTap: onTap,
+      style: TextStyle(
+        fontSize: 16,
+        color: dc.textPrimary,
+      ),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: dc.textMuted),
+        suffixIcon: suffixIcon,
+        filled: true,
+        fillColor: dc.cardBackground,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: dc.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: dc.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+    );
+  }
+
+  Widget _buildCountryDropdown(DarkModeColors dc) {
+    return Container(
+      decoration: BoxDecoration(
+        color: dc.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: dc.border),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _country.isEmpty ? null : _country,
+          hint: Text(
+            'Select country',
+            style: TextStyle(color: dc.textMuted, fontSize: 16),
+          ),
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down, color: dc.iconSecondary),
+          style: TextStyle(fontSize: 16, color: dc.textPrimary),
+          items: _allCountries.map((c) {
+            return DropdownMenuItem(value: c, child: Text(c));
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) setState(() => _country = value);
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickProfilePhoto() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (picked == null) return;
+      setState(() => _pickedFile = File(picked.path));
+    } catch (e) {
+      AppSnackbar.error('Could not pick image.');
+    }
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(now.year - 20),
+      firstDate: DateTime(1900),
+      lastDate: now,
+    );
+    if (picked != null) {
+      _dob.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+    }
+  }
+
+  Future<void> _updateProfile() async {
+    final p = Get.find<ProfileController>();
+    final onboardInfo = p.profile.value?.onboardInfo ?? const OnboardInfo();
+
+    final ok = await p.updateProfile(
+      fullName: _name.text.trim().isEmpty ? null : _name.text.trim(),
+      contactNumber: _phone.text.trim().isEmpty ? null : _phone.text.trim(),
+      onboardInfo: OnboardInfo(
+        age: onboardInfo.age,
+        country: _country,
+        purpose: onboardInfo.purpose,
+        goalTime: onboardInfo.goalTime,
+        userSource: onboardInfo.userSource,
+        languageStrength: onboardInfo.languageStrength,
+      ),
+      picture: _pickedFile,
+    );
+    if (ok && mounted) {
+      setState(() => _pictureVersion++);
+      Get.back();
+      AppSnackbar.success('Profile updated successfully.');
+    }
   }
 
   Widget _security() {
