@@ -18,6 +18,11 @@ class CmsService {
     return TextBlock.extract(r is Map ? r['learningGuide'] : r);
   }
 
+  Future<dynamic> helpGuideLexical() async {
+    final r = await _api.get(ApiEndpoints.helpCenter);
+    return r is Map ? r['learningGuide'] : null;
+  }
+
   Future<List<Map<String, dynamic>>> helpLearningTips() async {
     final r = await _api.get(ApiEndpoints.helpCenter);
     if (r is Map && r['learningTips'] is List) {

@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/dark_mode_colors.dart';
+import '../../common/lexical_renderer.dart';
 import '../../common/loading_state.dart';
 import '../../models/models.dart';
 import '../../services/cms_service.dart';
@@ -354,7 +355,7 @@ class _LearningTipsContent extends StatefulWidget {
 
 class _LearningTipsContentState extends State<_LearningTipsContent> {
   bool _loading = true;
-  String _guide = '';
+  dynamic _guide;
   List<Map<String, dynamic>> _tips = [];
 
   @override
@@ -367,12 +368,12 @@ class _LearningTipsContentState extends State<_LearningTipsContent> {
     try {
       final service = Get.find<CmsService>();
       final results = await Future.wait([
-        service.helpGuide(),
+        service.helpGuideLexical(),
         service.helpLearningTips(),
       ]);
       if (mounted) {
         setState(() {
-          _guide = results[0] as String;
+          _guide = results[0];
           _tips = results[1] as List<Map<String, dynamic>>;
           _loading = false;
         });
@@ -387,7 +388,7 @@ class _LearningTipsContentState extends State<_LearningTipsContent> {
     final dc = DarkModeColors.of(context);
     if (_loading) return const LoadingState();
 
-    if (_guide.isEmpty && _tips.isEmpty) {
+    if (_guide == null && _tips.isEmpty) {
       return Center(
         child: Text(
           'No content available at the moment.',
@@ -400,7 +401,7 @@ class _LearningTipsContentState extends State<_LearningTipsContent> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children: [
         const SizedBox(height: 8),
-        if (_guide.isNotEmpty) ...[
+        if (_guide != null) ...[
           Row(
             children: [
               Container(
@@ -436,12 +437,19 @@ class _LearningTipsContentState extends State<_LearningTipsContent> {
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: dc.border),
             ),
-            child: Text(
-              _guide,
+            child: DefaultTextStyle(
               style: TextStyle(
                 fontSize: 14,
                 height: 1.6,
                 color: dc.textSecondary,
+              ),
+              child: LexicalRenderer(
+                data: _guide,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: dc.textSecondary,
+                ),
               ),
             ),
           ),
