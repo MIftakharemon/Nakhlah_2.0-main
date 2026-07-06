@@ -572,27 +572,27 @@ class UserProfilePage extends StatelessWidget {
   final LeaderboardEntryModel user;
   final VoidCallback onBack;
 
+  // Web uses hardcoded mock data for chart
+  static const _injazData = [
+    _DayInjaz('Mon', 650),
+    _DayInjaz('Tue', 780),
+    _DayInjaz('Wed', 920),
+    _DayInjaz('Thu', 850),
+    _DayInjaz('Fri', 890),
+    _DayInjaz('Sat', 1020),
+    _DayInjaz('Sun', 948),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final dc = DarkModeColors.of(context);
     final colors = _gradientFor(user.rank - 1);
 
-    // Weekly activity mock data (matches website)
-    final injazData = [
-      _DayInjaz('Mon', 650),
-      _DayInjaz('Tue', 780),
-      _DayInjaz('Wed', 920),
-      _DayInjaz('Thu', 850),
-      _DayInjaz('Fri', 890),
-      _DayInjaz('Sat', 1020),
-      _DayInjaz('Sun', user.injazCount),
-    ];
-
     return Scaffold(
       backgroundColor: dc.cardBackground,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Column(
             children: [
               // ── Back button ────────────────────────────────────
@@ -615,7 +615,7 @@ class UserProfilePage extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // ── Profile Card ───────────────────────────────────
               Container(
@@ -670,7 +670,7 @@ class UserProfilePage extends StatelessWidget {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF8B5CF6),
+                              color: AppColors.accent,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 3),
                               boxShadow: [
@@ -694,7 +694,7 @@ class UserProfilePage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
                     // Name
                     Text(
@@ -705,7 +705,7 @@ class UserProfilePage extends StatelessWidget {
                         color: dc.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
 
                     // Email
                     if (user.email != null && user.email!.isNotEmpty)
@@ -716,14 +716,40 @@ class UserProfilePage extends StatelessWidget {
                           color: dc.textMuted,
                         ),
                       ),
+                    const SizedBox(height: 4),
+
+                    // Joined since (web hardcodes this)
+                    Text(
+                      'Joined since 16 May 2020',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: dc.textMuted,
+                      ),
+                    ),
                     const SizedBox(height: 20),
 
-                    // Stats row
+                    // Divider
+                    Divider(color: dc.border, height: 1),
+                    const SizedBox(height: 20),
+
+                    // Stats row (web: followers, following, lifetime Injaz)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _ProfileStat(value: '${user.injazCount}', label: 'lifetime Injaz'),
-                        _ProfileStat(value: '#${user.rank}', label: 'rank'),
+                        _ProfileStat(
+                          value: '1,725',
+                          label: 'followers',
+                          onTap: () {},
+                        ),
+                        _ProfileStat(
+                          value: '256',
+                          label: 'following',
+                          onTap: () {},
+                        ),
+                        _ProfileStat(
+                          value: _formatInjaz(user.injazCount),
+                          label: 'lifetime Injaz',
+                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -735,7 +761,7 @@ class UserProfilePage extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF8B5CF6),
+                              backgroundColor: AppColors.accent,
                               foregroundColor: Colors.white,
                               minimumSize: const Size.fromHeight(48),
                               shape: RoundedRectangleBorder(
@@ -762,7 +788,7 @@ class UserProfilePage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               side: BorderSide(
-                                color: Colors.grey.shade300,
+                                color: dc.border,
                                 width: 2,
                               ),
                             ),
@@ -781,9 +807,9 @@ class UserProfilePage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-              // ── Weekly Activity Chart ──────────────────────────
+              // ── Weekly Activity Chart Card ──────────────────────
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
@@ -802,6 +828,7 @@ class UserProfilePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Header (web: text-xl font-bold + text-3xl font-bold text-accent)
                     const Text(
                       'Weekly Activity',
                       style: TextStyle(
@@ -811,22 +838,38 @@ class UserProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${user.injazCount} Injaz',
+                      '${_formatInjaz(user.injazCount)} Injaz',
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w900,
-                        color: Color(0xFF8B5CF6),
+                        color: AppColors.accent,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
+
+                    // Chart (web: h-72, LineChart with monotone curve, no dots)
                     SizedBox(
-                      height: 200,
+                      height: 220,
                       child: LineChart(
                         LineChartData(
                           gridData: const FlGridData(show: false),
                           titlesData: FlTitlesData(
-                            leftTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 40,
+                                interval: 300,
+                                getTitlesWidget: (value, meta) {
+                                  return Text(
+                                    '${value.toInt()}',
+                                    style: TextStyle(
+                                      color: dc.textMuted,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                             rightTitles: const AxisTitles(
                               sideTitles: SideTitles(showTitles: false),
@@ -840,11 +883,11 @@ class UserProfilePage extends StatelessWidget {
                                 reservedSize: 30,
                                 getTitlesWidget: (value, meta) {
                                   final idx = value.toInt();
-                                  if (idx >= 0 && idx < injazData.length) {
+                                  if (idx >= 0 && idx < _injazData.length) {
                                     return Padding(
                                       padding: const EdgeInsets.only(top: 8),
                                       child: Text(
-                                        injazData[idx].day,
+                                        _injazData[idx].day,
                                         style: TextStyle(
                                           color: dc.textMuted,
                                           fontSize: 12,
@@ -861,7 +904,7 @@ class UserProfilePage extends StatelessWidget {
                           borderData: FlBorderData(show: false),
                           lineBarsData: [
                             LineChartBarData(
-                              spots: injazData
+                              spots: _injazData
                                   .asMap()
                                   .entries
                                   .map((e) => FlSpot(
@@ -870,25 +913,14 @@ class UserProfilePage extends StatelessWidget {
                                       ))
                                   .toList(),
                               isCurved: true,
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                              ),
+                              color: AppColors.accent,
                               barWidth: 4,
                               dotData: const FlDotData(show: false),
-                              belowBarData: BarAreaData(
-                                show: true,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    const Color(0xFF8B5CF6).withValues(alpha: .15),
-                                    const Color(0xFFEC4899).withValues(alpha: .02),
-                                  ],
-                                ),
-                              ),
+                              belowBarData: BarAreaData(show: false),
                             ),
                           ],
                           minY: 0,
+                          maxY: 1200,
                         ),
                       ),
                     ),
@@ -900,6 +932,16 @@ class UserProfilePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static String _formatInjaz(int value) {
+    final str = value.toString();
+    final buf = StringBuffer();
+    for (var i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 == 0) buf.write(',');
+      buf.write(str[i]);
+    }
+    return buf.toString();
   }
 
   Widget _profileInitials(LeaderboardEntryModel entry, double size) {
@@ -917,34 +959,38 @@ class UserProfilePage extends StatelessWidget {
 }
 
 class _ProfileStat extends StatelessWidget {
-  const _ProfileStat({required this.value, required this.label});
+  const _ProfileStat({required this.value, required this.label, this.onTap});
 
   final String value;
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final dc = DarkModeColors.of(context);
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF8B5CF6),
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: AppColors.accent,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: dc.textMuted,
-            fontWeight: FontWeight.w600,
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: dc.textMuted,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
