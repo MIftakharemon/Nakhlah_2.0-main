@@ -148,6 +148,10 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       contactNumber: _contactNumber.trim(),
     );
 
+    if (created && _profilePicture != null) {
+      await _profileCtrl.updateProfile(picture: _profilePicture);
+    }
+
     if (created) {
       Get.offAllNamed(Routes.shell);
       Get.find<AppController>().setTab(0);
@@ -947,85 +951,203 @@ class _ProfileInfoStepContentState extends State<_ProfileInfoStepContent> {
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(top: 8, bottom: 20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const IntroTitleBlock(
-            title: 'Tell us\nabout yourself',
-            body: 'Add your name and contact so we can personalise your experience.',
+            title: 'Tell us about you',
+            body: 'Add your profile details before we continue',
             titleSize: 26,
             align: TextAlign.left,
           ),
-          const SizedBox(height: 20),
-          GestureDetector(
-            onTap: _pickImage,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.accent.withValues(alpha: .08),
-                border: Border.all(
-                  color: AppColors.accent.withValues(alpha: .30),
-                  width: 2,
-                ),
+          const SizedBox(height: 24),
+          // Full Name Card
+          _buildFieldCard(
+            label: 'Full name',
+            child: TextField(
+              controller: _nameCtrl,
+              decoration: InputDecoration(
+                hintText: 'Your full name',
+                hintStyle: TextStyle(color: AppColors.muted),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
               ),
-              child: widget.profilePicture != null
-                  ? ClipOval(
-                      child: Image.file(
-                        widget.profilePicture!,
-                        fit: BoxFit.cover,
-                        width: 100,
-                        height: 100,
-                      ),
-                    )
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.camera_alt_rounded,
-                          color: AppColors.accent,
-                          size: 28,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Photo',
-                          style: TextStyle(
-                            color: AppColors.accent,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
+              style: TextStyle(
+                color: AppColors.ink,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-          const SizedBox(height: 24),
-          AuthPanel(
-            children: [
-              IntroTextField(
-                controller: _nameCtrl,
-                label: 'Full name',
-                icon: Icons.person_rounded,
-              ),
-              const SizedBox(height: 14),
-              IntroTextField(
-                controller: _contactCtrl,
-                label: 'Contact number',
-                icon: Icons.phone_rounded,
-                keyboardType: TextInputType.phone,
-              ),
-              if (_contactInvalid) ...[
-                const SizedBox(height: 6),
-                const Text(
-                  'Invalid number',
+          const SizedBox(height: 12),
+          // Contact Number Card
+          _buildFieldCard(
+            label: 'Contact number',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _contactCtrl,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    hintText: '0XXXXXXXXXX',
+                    hintStyle: TextStyle(color: AppColors.muted),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
                   style: TextStyle(
-                    color: AppColors.wrongRed,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
+                    color: AppColors.ink,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (_contactInvalid)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      'Invalid number',
+                      style: TextStyle(
+                        color: AppColors.wrongRed,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
               ],
-            ],
+            ),
           ),
+          const SizedBox(height: 12),
+          // Profile Picture Card
+          _buildFieldCard(
+            label: 'Profile picture (optional)',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.accent.withValues(alpha: .30),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.camera_alt_rounded,
+                              color: AppColors.accent,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Choose image',
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        widget.profilePicture != null
+                            ? widget.profilePicture!.path.split('/').last
+                            : 'Max size: 300KB',
+                        style: TextStyle(
+                          color: widget.profilePicture != null
+                              ? AppColors.ink
+                              : AppColors.muted,
+                          fontSize: 12,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (widget.profilePicture != null) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          widget.profilePicture!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: AppColors.correctGreen,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Ready to upload',
+                            style: TextStyle(
+                              color: AppColors.correctGreen,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFieldCard({required String label, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.accent.withValues(alpha: .15),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.muted,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          child,
         ],
       ),
     );
