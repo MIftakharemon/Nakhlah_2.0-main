@@ -196,52 +196,57 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isDark
-              ? (isSelected
-                  ? const Color(0xFF2C3544)
-                  : const Color(0xFF1C2333))
-              : (isSelected
-                  ? const Color(0xFFFAF5FF)
-                  : const Color(0xFFF5F5F5)),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? (isDark
-                    ? const Color(0xFF8E4EF2).withValues(alpha: 0.3)
-                    : const Color(0xFF7C3AED).withValues(alpha: 0.3))
-                : Colors.transparent,
-            width: 1,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          decoration: BoxDecoration(
+            color: isDark
+                ? (isSelected
+                    ? const Color(0xFF2C3544)
+                    : const Color(0xFF1C2333))
+                : (isSelected
+                    ? const Color(0xFFFAF5FF)
+                    : const Color(0xFFF5F5F5)),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark
+                      ? const Color(0xFF8E4EF2).withValues(alpha: 0.3)
+                      : const Color(0xFF7C3AED).withValues(alpha: 0.3))
+                  : Colors.transparent,
+              width: 1,
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              iconPath,
-              width: 24,
-              height: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isDark
-                    ? (isSelected
-                        ? const Color(0xFF8E4EF2)
-                        : const Color(0xFF9CA3AF))
-                    : (isSelected
-                        ? const Color(0xFF7C3AED)
-                        : const Color(0xFF6B7280)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                iconPath,
+                width: 26,
+                height: 26,
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.visible,
+                style: TextStyle(
+                  fontSize: 8,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isDark
+                      ? (isSelected
+                          ? const Color(0xFF8E4EF2)
+                          : const Color(0xFF9CA3AF))
+                      : (isSelected
+                          ? const Color(0xFF7C3AED)
+                          : const Color(0xFF6B7280)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
