@@ -9,6 +9,8 @@ import 'package:get_storage/get_storage.dart';
 import '../../common/app_motion.dart';
 import '../../common/empty_state.dart';
 import '../../common/loading_state.dart';
+import '../../constants/app_theme.dart';
+import '../../constants/app_colors.dart';
 import '../../controllers/content_controller.dart';
 import '../../controllers/gamification_controller.dart';
 import '../../controllers/profile_controller.dart';
@@ -1409,6 +1411,87 @@ bool _isLessonAvailable(
   return true;
 }
 
+void _showNoPalmDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (ctx) => Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('\u{1F4A7}', style: TextStyle(fontSize: 64)),
+            const SizedBox(height: 20),
+            const Text(
+              'No Palm Trees left for this lesson',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Take a short break, refill your Palm Trees, and come back ready to continue the journey.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: AppTheme.buttonHeight,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(ctx),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppTheme.buttonRadius),
+                  ),
+                ),
+                child: const Text('Back',
+                    style: TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w900)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: AppTheme.buttonHeight,
+              child: OutlinedButton(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  final gamCtrl = Get.find<GamificationController>();
+                  await gamCtrl.refillPalm();
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.optionBorderDefault),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppTheme.buttonRadius),
+                  ),
+                ),
+                child: const Text('Refill Palm Trees',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    )),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class _LessonDialogCard extends StatelessWidget {
   const _LessonDialogCard({
     required this.lesson,
@@ -1436,6 +1519,11 @@ class _LessonDialogCard extends StatelessWidget {
         onTap: locked
             ? null
             : () {
+                final gamCtrl = Get.find<GamificationController>();
+                if (gamCtrl.stock.value.palmStock <= 0) {
+                  _showNoPalmDialog(context);
+                  return;
+                }
                 Navigator.of(context).pop();
                 Get.toNamed(
                   Routes.exercise,
