@@ -363,6 +363,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       items: opts.age,
       selectedId: _ageId,
       onSelect: (id) => setState(() => _ageId = id),
+      hideImages: true,
     );
   }
 
@@ -542,12 +543,14 @@ class _SelectionStep extends StatelessWidget {
     required this.items,
     required this.selectedId,
     required this.onSelect,
+    this.hideImages = false,
   });
 
   final String title, subtitle;
   final List<OnboardingItem> items;
   final String selectedId;
   final ValueChanged<String> onSelect;
+  final bool hideImages;
 
   @override
   Widget build(BuildContext context) {
@@ -575,6 +578,7 @@ class _SelectionStep extends StatelessWidget {
                   item: item,
                   isSelected: isSelected,
                   onTap: () => onSelect(item.id),
+                  hideImage: hideImages,
                 ),
               );
             },
@@ -592,6 +596,7 @@ class _OptionCard extends StatefulWidget {
     required this.onTap,
     this.showMinDay = false,
     this.isVertical = false,
+    this.hideImage = false,
   });
 
   final OnboardingItem item;
@@ -599,6 +604,7 @@ class _OptionCard extends StatefulWidget {
   final VoidCallback onTap;
   final bool showMinDay;
   final bool isVertical;
+  final bool hideImage;
 
   @override
   State<_OptionCard> createState() => _OptionCardState();
@@ -612,7 +618,8 @@ class _OptionCardState extends State<_OptionCard> {
     final mediaUrl = widget.item.absoluteMediaUrl;
     final isSelected = widget.isSelected;
 
-    final iconWidget = mediaUrl != null
+    final showIcon = !widget.hideImage;
+    final iconWidget = showIcon && mediaUrl != null
         ? ClipRRect(
             borderRadius: BorderRadius.circular(widget.isVertical ? 12 : 10),
             child: SizedBox(
@@ -656,7 +663,9 @@ class _OptionCardState extends State<_OptionCard> {
               ),
             ),
           )
-        : _fallbackIcon(isSelected);
+        : showIcon
+            ? _fallbackIcon(isSelected)
+            : const SizedBox.shrink();
 
     final textWidget = Text(
       widget.showMinDay ? '${widget.item.title} min / day' : widget.item.title,
