@@ -259,7 +259,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       title: opts.goalTimeTopTitle.isNotEmpty
           ? opts.goalTimeTopTitle
           : 'Set your daily goal',
-      subtitle: 'A small habit you can keep every single day.',
+      subtitle: 'How much time can you dedicate each day?',
       items: opts.goal,
       selectedGoalTime: _goalTime,
       onSelect: (v) => setState(() => _goalTime = v),
@@ -534,11 +534,13 @@ class _OptionCard extends StatefulWidget {
     required this.item,
     required this.isSelected,
     required this.onTap,
+    this.showMinDay = false,
   });
 
   final OnboardingItem item;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool showMinDay;
 
   @override
   State<_OptionCard> createState() => _OptionCardState();
@@ -628,7 +630,9 @@ class _OptionCardState extends State<_OptionCard> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                widget.item.title,
+                widget.showMinDay
+                    ? '${widget.item.title} min / day'
+                    : widget.item.title,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -716,6 +720,7 @@ class _GoalPickerStep extends StatelessWidget {
                   item: item,
                   isSelected: isSelected,
                   onTap: () => onSelect(goalVal),
+                  showMinDay: true,
                 );
               },
             )
@@ -760,7 +765,7 @@ class _GoalPickerStep extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'min',
+                      '$min min / day',
                       style: TextStyle(
                         color: isSelected
                             ? Colors.white.withValues(alpha: .80)
