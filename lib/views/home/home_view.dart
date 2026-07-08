@@ -480,55 +480,105 @@ class _SectionUnlockerPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = DarkModeColors.of(context);
     return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            margin: const EdgeInsets.only(top: 24),
-            padding: const EdgeInsets.all(24),
-            constraints: const BoxConstraints(maxWidth: 400),
-            decoration: BoxDecoration(
-              color: const Color(0x4DFFFFFF), // bg-white/30
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0x66FFFFFF), // border-white/40
-                width: 1,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 0),
+        padding: const EdgeInsets.all(24),
+        constraints: const BoxConstraints(maxWidth: 400),
+        decoration: BoxDecoration(
+          color: dc.cardBackground,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: CustomPaint(
+          painter: _DashedBorderPainter(
+            color: dc.border,
+            strokeWidth: 2,
+            dashLength: 8,
+            gapLength: 0,
+            borderRadius: 12,
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              Icon(
+                Icons.lock_outline_rounded,
+                color: dc.textSecondary,
+                size: 30,
               ),
-            ),
-            child: Column(
-              children: [
-                const Icon(
-                  Icons.lock_outline_rounded,
-                  color: Colors.white70,
-                  size: 28,
+              const SizedBox(height: 12),
+              Text(
+                'Next Section Locked',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: dc.textPrimary,
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Next Section Locked',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(
                   'Complete the current section to unlock the next one.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white70,
+                    color: dc.textSecondary,
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 40),
+            ],
           ),
         ),
       ),
     );
   }
+}
+
+class _DashedBorderPainter extends CustomPainter {
+  _DashedBorderPainter({
+    required this.color,
+    this.strokeWidth = 2,
+    this.dashLength = 8,
+    this.gapLength = 5,
+    this.borderRadius = 12,
+  });
+
+  final Color color;
+  final double strokeWidth;
+  final double dashLength;
+  final double gapLength;
+  final double borderRadius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(borderRadius),
+    );
+    final path = Path()..addRRect(rrect);
+    final metrics = path.computeMetrics().first;
+    final totalLength = metrics.length;
+
+    double distance = 0;
+    while (distance < totalLength) {
+      final start = metrics.getTangentForOffset(distance)!.position;
+      final end = distance + dashLength <= totalLength
+          ? metrics.getTangentForOffset(distance + dashLength)!.position
+          : metrics.getTangentForOffset(totalLength)!.position;
+      canvas.drawLine(start, end, paint);
+      distance += dashLength + gapLength;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // ---------------------------------------------------------------------------
@@ -598,7 +648,7 @@ class _GlassStatsBar extends StatelessWidget {
       builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
