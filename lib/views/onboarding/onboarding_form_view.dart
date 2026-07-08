@@ -221,23 +221,16 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
 
   Widget _buildBottomBar() {
     final isLast = _step == _totalSteps - 1;
+    if (isLast) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Obx(() {
         final loading = _profileCtrl.loading.value;
         return IntroPrimaryButton(
-          label: isLast ? 'Start Learning' : 'Continue',
-          icon: isLast ? Icons.rocket_launch_rounded : Icons.arrow_forward_rounded,
+          label: 'Continue',
+          icon: Icons.arrow_forward_rounded,
           loading: loading,
-          onPressed: _canProceed
-              ? () {
-                  if (isLast) {
-                    _submit();
-                  } else {
-                    _next();
-                  }
-                }
-              : null,
+          onPressed: _canProceed ? () => _next() : null,
         );
       }),
     );
@@ -400,44 +393,77 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(top: 8, bottom: 20),
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.premiumGradientStart, AppColors.premiumGradientEnd],
+      child: Center(
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: AppColors.accent.withValues(alpha: .15),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .04),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accent.withValues(alpha: .30),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const NakhlahMascot(size: 160),
+              const SizedBox(height: 28),
+              const Text(
+                'You\'re ready',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.ink,
+                  height: 1.2,
                 ),
-              ],
-            ),
-            child: const Icon(
-              Icons.check_rounded,
-              color: Colors.white,
-              size: 56,
-            ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Start your first lesson now \u2728',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.muted,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Start Learning',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 28),
-          const IntroTitleBlock(
-            title: 'You\'re All Set!',
-            body:
-                'Your profile is ready. Tap below to start your Arabic learning journey with Nakhlah.',
-            titleSize: 32,
-            align: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          const IntroStatBadges(),
-        ],
+        ),
       ),
     );
   }
