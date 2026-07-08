@@ -979,7 +979,7 @@ class _LessonNodePosition extends StatelessWidget {
               Positioned(top: 16, left: 0, child: _SvgNode(node: node)),
               if (node.isCurrent)
                 const Positioned(
-                  top: -46,
+                  top: -26,
                   left: 0,
                   right: 0,
                   child: Center(child: _StartSpeechBubble()),
