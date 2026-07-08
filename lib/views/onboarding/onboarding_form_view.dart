@@ -241,12 +241,18 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
   // ── Step 0: Proficiency ──────────────────────────────────────
 
   Widget _buildProficiencyStep(OnboardingOptions opts) {
+    final items = List<OnboardingItem>.from(opts.languageStrength);
+    if (items.length >= 2) {
+      final temp = items[0];
+      items[0] = items[1];
+      items[1] = temp;
+    }
     return _SelectionStep(
       title: opts.strengthsTitleTop.isNotEmpty
           ? opts.strengthsTitleTop
           : 'What is your Arabic\nproficiency level?',
       subtitle: 'We\'ll personalise lessons to match your level.',
-      items: opts.languageStrength,
+      items: items,
       selectedId: _strengthId,
       onSelect: (id) => setState(() => _strengthId = id),
     );
