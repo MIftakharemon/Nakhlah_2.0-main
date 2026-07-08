@@ -25,6 +25,39 @@ String _stripArabicDiacritics(String value) {
   return value.replaceAll(RegExp(r'[\u064B-\u065F\u0670]'), '');
 }
 
+bool _hasArabicDiacritics(String value) {
+  return RegExp(r'[\u064B-\u065F\u0670]').hasMatch(value);
+}
+
+const _diacriticsFallbackByBaseWord = <String, String>{
+  'اسمي': 'اِسْمِي',
+  'العربية': 'الْعَرَبِيَّة',
+  'مرحبا': 'مَرْحَبًا',
+  'شكرا': 'شُكْرًا',
+  'سلام': 'سَلَام',
+  'كتاب': 'كِتَاب',
+  'قلم': 'قَلَم',
+  'بيت': 'بَيْت',
+  'ولد': 'وَلَد',
+  'بنت': 'بِنْت',
+  'ماء': 'مَاء',
+  'نور': 'نُور',
+  'حب': 'حُبّ',
+  'خير': 'خَيْر',
+  'طول': 'طَوِيل',
+  'جديد': 'جَدِيد',
+  'قديم': 'قَدِيم',
+  'كبير': 'كَبِير',
+  'صغير': 'صَغِير',
+  'جميل': 'جَمِيل',
+};
+
+String _applyDiacriticsFallback(String value) {
+  final normalized = value.toString();
+  final base = _stripArabicDiacritics(normalized).replaceAll(RegExp(r'\s+'), '').trim();
+  return _diacriticsFallbackByBaseWord[base] ?? normalized;
+}
+
 String _buildDiacritizedPreview(String targetWord, String selectedWord) {
   if (targetWord.isEmpty || selectedWord.isEmpty) return selectedWord;
 
@@ -1273,9 +1306,29 @@ class _ExerciseViewState extends State<ExerciseView>
     final selectedWord = _selectedTokens.map((t) => t.title).join('');
     String previewWord = selectedWord;
     if (!isSentence && selectedWord.isNotEmpty) {
-      final targetWord = q.correctAnswer?.title ?? q.learnAnswer;
-      if (targetWord.isNotEmpty) {
-        previewWord = _buildDiacritizedPreview(targetWord, selectedWord);
+      final orderedTokens = q.sortedAnswers.map((a) => a.title).join('');
+      final candidates = [
+        q.cleanLearnAnswer,
+        q.correctAnswer?.title ?? '',
+        orderedTokens,
+      ];
+      final targetWord = candidates.firstWhere(
+        (c) => c.trim().isNotEmpty,
+        orElse: () => '',
+      );
+      final fallbackTargetWord = _applyDiacriticsFallback(
+        targetWord.isNotEmpty ? targetWord : orderedTokens,
+      );
+      String bestTarget;
+      if (targetWord.isEmpty) {
+        bestTarget = fallbackTargetWord;
+      } else if (!_hasArabicDiacritics(targetWord)) {
+        bestTarget = fallbackTargetWord;
+      } else {
+        bestTarget = targetWord;
+      }
+      if (bestTarget.isNotEmpty) {
+        previewWord = _buildDiacritizedPreview(bestTarget, selectedWord);
       }
     }
 
