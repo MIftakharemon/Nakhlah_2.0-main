@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../common/app_motion.dart';
 import '../../common/nakhlah_intro_widgets.dart';
+import '../../common/nakhlah_mascot.dart';
 import '../../constants/app_colors.dart';
 import '../../controllers/app_controller.dart';
 import '../../controllers/auth_controller.dart';
@@ -358,7 +359,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
   Widget _buildAgeStep(OnboardingOptions opts) {
     return _SelectionStep(
       title: opts.ageTitleTop.isNotEmpty ? opts.ageTitleTop : 'How old are you?',
-      subtitle: 'This helps us personalise your learning path.',
+      subtitle: 'Select your age range',
       items: opts.age,
       selectedId: _ageId,
       onSelect: (id) => setState(() => _ageId = id),
@@ -1203,37 +1204,125 @@ class _AccountStepContentState extends State<_AccountStepContent> {
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(top: 8, bottom: 20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IntroTitleBlock(
-            title: 'Your account',
-            body: widget.isReadOnly
-                ? 'You\'re already signed in. Tap continue to finish setup.'
-                : 'Create your account to save progress and compete on the leaderboard.',
-            titleSize: 26,
-            align: TextAlign.left,
+          // Mascot + Title row (matching web)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const NakhlahMascot(size: 120),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Just a few\ndetails',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.ink,
+                        height: 1.15,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'We\'ll use these to personalize your experience',
+                      style: TextStyle(
+                        color: AppColors.muted,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          if (!widget.isReadOnly)
-            AuthPanel(
-              children: [
-                IntroTextField(
-                  controller: _emailCtrl,
-                  label: 'Email address',
-                  icon: Icons.email_rounded,
-                  keyboardType: TextInputType.emailAddress,
+          const SizedBox(height: 32),
+          if (!widget.isReadOnly) ...[
+            // Email card
+            _buildFieldCard(
+              label: 'Email',
+              child: TextField(
+                controller: _emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  hintText: 'you@example.com',
+                  hintStyle: TextStyle(color: AppColors.muted),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
                 ),
-                const SizedBox(height: 14),
-                IntroTextField(
-                  controller: _passCtrl,
-                  label: 'Password',
-                  icon: Icons.lock_rounded,
-                  obscureText: _obscure,
-                  isObscured: _obscure,
-                  onToggleObscure: () => setState(() => _obscure = !_obscure),
+                style: TextStyle(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
-            )
-          else
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Password card
+            _buildFieldCard(
+              label: 'Create a password',
+              child: TextField(
+                controller: _passCtrl,
+                obscureText: _obscure,
+                decoration: InputDecoration(
+                  hintText: 'Choose a secure password',
+                  hintStyle: const TextStyle(color: AppColors.muted),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                  suffixIcon: GestureDetector(
+                    onTap: () => setState(() => _obscure = !_obscure),
+                    child: Icon(
+                      _obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                      color: AppColors.muted,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                style: TextStyle(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Terms text
+            RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  color: AppColors.muted,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+                children: [
+                  const TextSpan(
+                    text: 'By continuing you agree to our ',
+                  ),
+                  TextSpan(
+                    text: 'Terms',
+                    style: TextStyle(
+                      color: AppColors.ink,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const TextSpan(
+                    text: ' and ',
+                  ),
+                  TextSpan(
+                    text: 'Privacy Policy',
+                    style: TextStyle(
+                      color: AppColors.ink,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const TextSpan(
+                    text: '.',
+                  ),
+                ],
+              ),
+            ),
+          ] else
             AuthPanel(
               children: [
                 Row(
@@ -1248,7 +1337,7 @@ class _AccountStepContentState extends State<_AccountStepContent> {
                       child: const Icon(
                         Icons.check_circle_rounded,
                         color: AppColors.accent,
-                        size: 22,
+                        size: 24,
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -1256,21 +1345,20 @@ class _AccountStepContentState extends State<_AccountStepContent> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Signed in as',
+                          Text(
+                            widget.email,
                             style: TextStyle(
-                              color: AppColors.muted,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
+                              color: AppColors.ink,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            widget.email,
-                            style: const TextStyle(
-                              color: AppColors.ink,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
+                            'Signed in',
+                            style: TextStyle(
+                              color: AppColors.muted,
+                              fontSize: 12,
                             ),
                           ),
                         ],
@@ -1280,6 +1368,43 @@ class _AccountStepContentState extends State<_AccountStepContent> {
                 ),
               ],
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFieldCard({required String label, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.accent.withValues(alpha: .15),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.muted,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          child,
         ],
       ),
     );
