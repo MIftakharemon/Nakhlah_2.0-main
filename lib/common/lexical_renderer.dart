@@ -61,6 +61,7 @@ class LexicalRenderer extends StatelessWidget {
           ),
         );
 
+
       case 'horizontalrule':
         return const Padding(
           padding: EdgeInsets.symmetric(vertical: 8),
