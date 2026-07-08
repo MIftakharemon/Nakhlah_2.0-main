@@ -443,6 +443,56 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
 }
 
 // ─────────────────────────────────────────────────────────────
+//  Mascot + Title header (shared across all onboarding steps)
+// ─────────────────────────────────────────────────────────────
+
+class _MascotTitleHeader extends StatelessWidget {
+  const _MascotTitleHeader({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const NakhlahMascot(size: 100),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.ink,
+                  height: 1.15,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: AppColors.muted,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
 //  Progress bar
 // ─────────────────────────────────────────────────────────────
 
@@ -507,11 +557,9 @@ class _SelectionStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IntroTitleBlock(
+          _MascotTitleHeader(
             title: title,
-            body: subtitle,
-            titleSize: 26,
-            align: TextAlign.left,
+            subtitle: subtitle,
           ),
           const SizedBox(height: 20),
           ListView.builder(
@@ -735,11 +783,9 @@ class _GoalPickerStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IntroTitleBlock(
+          _MascotTitleHeader(
             title: title,
-            body: subtitle,
-            titleSize: 26,
-            align: TextAlign.left,
+            subtitle: subtitle,
           ),
           const SizedBox(height: 20),
           if (items.isNotEmpty)
@@ -853,11 +899,9 @@ class _MultiSelectStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IntroTitleBlock(
+          _MascotTitleHeader(
             title: title,
-            body: subtitle,
-            titleSize: 26,
-            align: TextAlign.left,
+            subtitle: subtitle,
           ),
           const SizedBox(height: 20),
           ListView.builder(
@@ -954,11 +998,9 @@ class _ProfileInfoStepContentState extends State<_ProfileInfoStepContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const IntroTitleBlock(
+          const _MascotTitleHeader(
             title: 'Tell us about you',
-            body: 'Add your profile details before we continue',
-            titleSize: 26,
-            align: TextAlign.left,
+            subtitle: 'Add your profile details before we continue',
           ),
           const SizedBox(height: 24),
           // Full Name Card
