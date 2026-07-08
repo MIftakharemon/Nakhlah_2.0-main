@@ -52,7 +52,7 @@ class _OnboardingViewState extends State<OnboardingView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F7F4),
       body: PageView(
         controller: _ctrl,
         physics: const NeverScrollableScrollPhysics(),
@@ -118,12 +118,12 @@ class _LandingPage extends StatelessWidget {
             // ── Speech bubble ────────────────────────────────────────
             Align(
               alignment: Alignment.center,
-              child: _SpeechBubble(text: "Hi there! I'm El!"),
+              child: _SpeechBubble(text: "Hi there! I'm Fatima!"),
             ),
             const SizedBox(height: 12),
 
             // ── Mascot — matches web SVG ─────────────────────────
-            const NakhlahMascot(size: 160),
+            const NakhlahMascot(size: 220),
 
             const Spacer(flex: 2),
 
@@ -131,23 +131,23 @@ class _LandingPage extends StatelessWidget {
             Text(
               'Nakhlah',
               style: TextStyle(
-                fontSize: 38,
+                fontSize: 48,
                 fontWeight: FontWeight.w900,
                 color: _purple,
                 letterSpacing: -1,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
             // ── Tagline ──────────────────────────────────────────────
             const Text(
-              "Learn Arabic whenever and\nwherever you want. It's free and forever.",
+              "Learn Arabic whenever and wherever\nyou want. It's free and forever.",
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 17,
                 color: _textGrey,
-                fontWeight: FontWeight.w600,
-                height: 1.45,
+                fontWeight: FontWeight.w500,
+                height: 1.5,
               ),
             ),
 
@@ -181,14 +181,14 @@ class _SpeechBubble extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: .10),
-                blurRadius: 16,
+                color: Colors.black.withValues(alpha: .08),
+                blurRadius: 20,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -196,8 +196,8 @@ class _SpeechBubble extends StatelessWidget {
           child: Text(
             text,
             style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
               color: _textDark,
             ),
           ),
@@ -240,48 +240,49 @@ class _BigButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!filled) {
+      // Text-only button (matches web "I ALREADY HAVE AN ACCOUNT")
+      return SizedBox(
+        width: double.infinity,
+        height: 54,
+        child: TextButton(
+          onPressed: onTap,
+          style: TextButton.styleFrom(
+            foregroundColor: _purple,
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 13.5,
+              letterSpacing: .4,
+            ),
+          ),
+        ),
+      );
+    }
     return SizedBox(
       width: double.infinity,
       height: 54,
-      child: filled
-          ? ElevatedButton(
-              onPressed: onTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _purple,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 15,
-                  letterSpacing: .6,
-                ),
-              ),
-            )
-          : OutlinedButton(
-              onPressed: onTap,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: _purple,
-                side: const BorderSide(color: Color(0xFFDDD6F8), width: 1.5),
-                backgroundColor: _purpleLight,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13.5,
-                  letterSpacing: .4,
-                ),
-              ),
-            ),
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _purple,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 15,
+            letterSpacing: .6,
+          ),
+        ),
+      ),
     );
   }
 }
