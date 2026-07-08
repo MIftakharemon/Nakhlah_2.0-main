@@ -503,23 +503,20 @@ class _SelectionStep extends StatelessWidget {
             align: TextAlign.left,
           ),
           const SizedBox(height: 20),
-          GridView.builder(
+          ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.1,
-            ),
             itemCount: items.length,
             itemBuilder: (context, i) {
               final item = items[i];
               final isSelected = item.id == selectedId;
-              return _OptionCard(
-                item: item,
-                isSelected: isSelected,
-                onTap: () => onSelect(item.id),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _OptionCard(
+                  item: item,
+                  isSelected: isSelected,
+                  onTap: () => onSelect(item.id),
+                ),
               );
             },
           ),
@@ -535,12 +532,14 @@ class _OptionCard extends StatefulWidget {
     required this.isSelected,
     required this.onTap,
     this.showMinDay = false,
+    this.isVertical = false,
   });
 
   final OnboardingItem item;
   final bool isSelected;
   final VoidCallback onTap;
   final bool showMinDay;
+  final bool isVertical;
 
   @override
   State<_OptionCard> createState() => _OptionCardState();
@@ -553,96 +552,127 @@ class _OptionCardState extends State<_OptionCard> {
   Widget build(BuildContext context) {
     final mediaUrl = widget.item.absoluteMediaUrl;
     final isSelected = widget.isSelected;
+
+    final iconWidget = mediaUrl != null
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(widget.isVertical ? 12 : 10),
+            child: SizedBox(
+              width: widget.isVertical ? 56 : 44,
+              height: widget.isVertical ? 56 : 44,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (!_imageReady)
+                    Positioned.fill(
+                      child: Shimmer.fromColors(
+                        baseColor: const Color(0xFFE8E0F0),
+                        highlightColor: const Color(0xFFF8F4FC),
+                        period: const Duration(milliseconds: 1200),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF0ECF5),
+                            borderRadius: BorderRadius.circular(widget.isVertical ? 12 : 10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  Positioned.fill(
+                    child: CachedNetworkImage(
+                      imageUrl: mediaUrl,
+                      fit: BoxFit.contain,
+                      memCacheWidth: widget.isVertical ? 112 : 88,
+                      fadeInDuration: Duration.zero,
+                      imageBuilder: (_, imageProvider) {
+                        if (!_imageReady) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) setState(() => _imageReady = true);
+                          });
+                        }
+                        return Image(image: imageProvider, fit: BoxFit.contain);
+                      },
+                      errorWidget: (_, __, ___) => _fallbackIcon(isSelected),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : _fallbackIcon(isSelected);
+
+    final textWidget = Text(
+      widget.showMinDay ? '${widget.item.title} min / day' : widget.item.title,
+      textAlign: widget.isVertical ? TextAlign.center : TextAlign.left,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: isSelected ? AppColors.accent : AppColors.ink,
+        fontWeight: FontWeight.w800,
+        fontSize: widget.isVertical ? 13 : 15,
+      ),
+    );
+
+    final cardDecoration = BoxDecoration(
+      color: isSelected ? AppColors.optionBgSelected : Colors.white,
+      borderRadius: BorderRadius.circular(widget.isVertical ? 20 : 16),
+      border: Border.all(
+        color: isSelected ? AppColors.accent : AppColors.accent.withValues(alpha: .12),
+        width: isSelected ? 2.5 : 1.2,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isSelected ? .08 : .04),
+          blurRadius: isSelected ? 16 : 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+
+    if (widget.isVertical) {
+      return GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: AppMotion.fast,
+          curve: AppMotion.out,
+          decoration: cardDecoration,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              iconWidget,
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: textWidget,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: widget.onTap,
       child: AnimatedContainer(
         duration: AppMotion.fast,
         curve: AppMotion.out,
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.optionBgSelected : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.accent : AppColors.accent.withValues(alpha: .12),
-            width: isSelected ? 2.5 : 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isSelected ? .08 : .04),
-              blurRadius: isSelected ? 16 : 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: cardDecoration,
+        child: Row(
           children: [
-            if (mediaUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (!_imageReady)
-                        Positioned.fill(
-                          child: Shimmer.fromColors(
-                            baseColor: const Color(0xFFE8E0F0),
-                            highlightColor: const Color(0xFFF8F4FC),
-                            period: const Duration(milliseconds: 1200),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF0ECF5),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      Positioned.fill(
-                        child: CachedNetworkImage(
-                          imageUrl: mediaUrl,
-                          fit: BoxFit.contain,
-                          memCacheWidth: 112,
-                          fadeInDuration: Duration.zero,
-                          imageBuilder: (_, imageProvider) {
-                            if (!_imageReady) {
-                              WidgetsBinding.instance
-                                  .addPostFrameCallback((_) {
-                                if (mounted) setState(() => _imageReady = true);
-                              });
-                            }
-                            return Image(
-                              image: imageProvider,
-                              fit: BoxFit.contain,
-                            );
-                          },
-                          errorWidget: (_, __, ___) => _fallbackIcon(isSelected),
-                        ),
-                      ),
-                    ],
-                  ),
+            iconWidget,
+            const SizedBox(width: 14),
+            Expanded(child: textWidget),
+            if (isSelected) ...[
+              const SizedBox(width: 10),
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: AppColors.accent,
+                  shape: BoxShape.circle,
                 ),
-              )
-            else
-              _fallbackIcon(isSelected),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                widget.showMinDay
-                    ? '${widget.item.title} min / day'
-                    : widget.item.title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: isSelected ? AppColors.accent : AppColors.ink,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 13,
-                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 16),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -651,18 +681,18 @@ class _OptionCardState extends State<_OptionCard> {
 
   Widget _fallbackIcon(bool isSelected) {
     return Container(
-      width: 56,
-      height: 56,
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
         color: isSelected
             ? AppColors.accent.withValues(alpha: .12)
             : AppColors.accent.withValues(alpha: .08),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(
         Icons.auto_awesome_rounded,
         color: isSelected ? AppColors.accent : AppColors.accent,
-        size: 28,
+        size: 22,
       ),
     );
   }
@@ -721,6 +751,7 @@ class _GoalPickerStep extends StatelessWidget {
                   isSelected: isSelected,
                   onTap: () => onSelect(goalVal),
                   showMinDay: true,
+                  isVertical: true,
                 );
               },
             )
@@ -818,23 +849,20 @@ class _MultiSelectStep extends StatelessWidget {
             align: TextAlign.left,
           ),
           const SizedBox(height: 20),
-          GridView.builder(
+          ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.1,
-            ),
             itemCount: items.length,
             itemBuilder: (context, i) {
               final item = items[i];
               final isSelected = selectedIds.contains(item.id);
-              return _OptionCard(
-                item: item,
-                isSelected: isSelected,
-                onTap: () => onToggle(item.id),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _OptionCard(
+                  item: item,
+                  isSelected: isSelected,
+                  onTap: () => onToggle(item.id),
+                ),
               );
             },
           ),
