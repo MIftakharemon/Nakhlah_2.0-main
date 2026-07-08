@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../common/app_button.dart';
 import '../../common/app_motion.dart';
@@ -29,24 +26,6 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  // Cache-bust version counter — incremented after each photo upload
-  // so CachedNetworkImageProvider fetches the new image.
-  int _pictureVersion = 0;
-
-  Future<void> _pickProfilePhoto(ProfileController controller) async {
-    try {
-      final picked = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-      );
-      if (picked == null) return;
-      await controller.updateProfile(picture: File(picked.path));
-      if (mounted) setState(() => _pictureVersion++);
-    } catch (e) {
-      AppSnackbar.error('Could not update profile photo.');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -167,10 +146,7 @@ class _ProfileViewState extends State<ProfileView> {
     AuthController a,
   ) {
     final dc = DarkModeColors.of(context);
-    String? imageUrl = p.profile.value?.profilePicture?.absoluteUrl;
-    if (imageUrl != null && imageUrl.isNotEmpty && _pictureVersion > 0) {
-      imageUrl = '$imageUrl?v=$_pictureVersion';
-    }
+    final imageUrl = p.profile.value?.profilePicture?.absoluteUrl;
     final name =
         p.profile.value?.fullName ??
         a.user.value?.name ??
@@ -180,60 +156,31 @@ class _ProfileViewState extends State<ProfileView> {
 
     return Column(
       children: [
-        InkWell(
-          onTap: () => _pickProfilePhoto(p),
-          customBorder: const CircleBorder(),
-          child: Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: dc.cardBackground, width: 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: CircleAvatar(
-                  radius: 52,
-                  backgroundColor: const Color(0xFFF3E8FF),
-                  backgroundImage: imageUrl != null
-                      ? CachedNetworkImageProvider(imageUrl)
-                      : null,
-                  child: imageUrl == null
-                      ? const Icon(
-                          Icons.person,
-                          size: 52,
-                          color: AppColors.accent,
-                        )
-                      : null,
-                ),
-              ),
-              Positioned(
-                bottom: 4,
-                right: 4,
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: dc.cardBackground, width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(Icons.edit, color: Colors.white, size: 16),
-                ),
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: dc.cardBackground, width: 4),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
             ],
+          ),
+          child: CircleAvatar(
+            radius: 52,
+            backgroundColor: const Color(0xFFF3E8FF),
+            backgroundImage: imageUrl != null
+                ? CachedNetworkImageProvider(imageUrl)
+                : null,
+            child: imageUrl == null
+                ? const Icon(
+                    Icons.person,
+                    size: 52,
+                    color: AppColors.accent,
+                  )
+                : null,
           ),
         ),
         const SizedBox(height: 16),
@@ -360,11 +307,7 @@ class _ProfileViewState extends State<ProfileView> {
         const SizedBox(width: 12),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () {
-              SharePlus.instance.share(
-                ShareParams(text: 'Check out my progress on Nakhlah!'),
-              );
-            },
+            onPressed: () => _showShareProfileSheet(context),
             icon: const Icon(Icons.share, size: 18),
             label: const Text('Share', overflow: TextOverflow.ellipsis),
             style: OutlinedButton.styleFrom(
@@ -382,6 +325,17 @@ class _ProfileViewState extends State<ProfileView> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showShareProfileSheet(BuildContext context) {
+    final profileUrl = 'https://app.nakhlah.net/profile';
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => _ShareProfileSheet(profileUrl: profileUrl),
     );
   }
 
@@ -1043,6 +997,186 @@ class _GamificationStat {
     required this.label,
     required this.color,
   });
+}
+
+class _ShareProfileSheet extends StatelessWidget {
+  const _ShareProfileSheet({required this.profileUrl});
+
+  final String profileUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Share Profile',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Share via',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _ShareOption(
+                icon: Icons.chat_bubble,
+                label: 'WhatsApp',
+                color: const Color(0xFF25D366),
+                onTap: () => _shareVia('whatsapp', context),
+              ),
+              _ShareOption(
+                icon: Icons.email,
+                label: 'Email',
+                color: const Color(0xFF4285F4),
+                onTap: () => _shareVia('email', context),
+              ),
+              _ShareOption(
+                icon: Icons.chat,
+                label: 'Twitter',
+                color: const Color(0xFF1DA1F2),
+                onTap: () => _shareVia('twitter', context),
+              ),
+              _ShareOption(
+                icon: Icons.facebook,
+                label: 'Facebook',
+                color: const Color(0xFF1877F2),
+                onTap: () => _shareVia('facebook', context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Profile Link',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    profileUrl,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                SharePlus.instance.share(
+                  ShareParams(text: profileUrl),
+                );
+                Navigator.pop(context);
+                AppSnackbar.success('Profile link copied!');
+              },
+              icon: const Icon(Icons.copy, size: 18),
+              label: const Text('Copy'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _shareVia(String platform, BuildContext context) {
+    final text = 'Check out my profile on Nakhlah! $profileUrl';
+    SharePlus.instance.share(ShareParams(text: text));
+    Navigator.pop(context);
+  }
+}
+
+class _ShareOption extends StatelessWidget {
+  const _ShareOption({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: 28),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _AreaChartPainter extends CustomPainter {
