@@ -12,13 +12,13 @@ class AppTheme {
   static const double largeRadius = 24; // rounded-3xl
   static const EdgeInsets bottomActionPadding = EdgeInsets.all(16);
   static const String fontFamily = 'Inter';
-  static const String arabicFontFamily = 'Amiri';
+  static const String arabicFontFamily = 'Inter';
 
   static TextStyle arabicTextStyle({
     double fontSize = 34,
-    FontWeight fontWeight = FontWeight.w900,
+    FontWeight fontWeight = FontWeight.w700,
     Color color = AppColors.textPrimary,
-  }) => GoogleFonts.amiri(
+  }) => GoogleFonts.inter(
     fontSize: fontSize,
     fontWeight: fontWeight,
     color: color,
