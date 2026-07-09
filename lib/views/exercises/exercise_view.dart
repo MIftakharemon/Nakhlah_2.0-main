@@ -289,7 +289,7 @@ class _ExerciseViewState extends State<ExerciseView>
   void _shuffleAllAnswers() {
     for (var i = 0; i < _questions.length; i++) {
       final q = _questions[i];
-      if (q.isMcq || q.isTrueFalse || q.isFillBlank) {
+      if (q.isMcq || q.isTrueFalse || q.isFillBlank || q.isWordMaking || q.isSentenceMaking) {
         final shuffled = [...q.answers]..shuffle();
         _questions[i] = LessonQuestion(
           id: q.id,
@@ -1299,7 +1299,7 @@ class _ExerciseViewState extends State<ExerciseView>
 
   // ─── WORD / SENTENCE MAKING ────────────────────────────────────────────
   Widget _buildTokenMakingQuestion(LessonQuestion q) {
-    final sorted = q.sortedAnswers;
+    final sorted = q.answers;
     final isSentence = q.questionType == 'sentence_making';
 
     // Build diacritized preview for word_making
