@@ -786,7 +786,7 @@ class _ExerciseViewState extends State<ExerciseView>
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: List.generate(_maxPalmTreesForSession, (i) {
+                  children: List.generate(5, (i) {
                     final active = i < _palmTrees;
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 1),
