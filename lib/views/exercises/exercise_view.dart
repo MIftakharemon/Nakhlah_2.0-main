@@ -843,7 +843,7 @@ class _ExerciseViewState extends State<ExerciseView>
 
   Widget _buildDivider() {
     return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 20),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Divider(
         color: Color(0xFFE0E0E0),
         thickness: 1,
@@ -876,17 +876,17 @@ class _ExerciseViewState extends State<ExerciseView>
   // ─── LEARN ──────────────────────────────────────────────────────────────
   Widget _buildLearnQuestion(LessonQuestion q) {
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 60),
+          const SizedBox(height: 12),
 
-          _buildQuestionLabel('Learn'),
-          const SizedBox(height: 20),
+          Center(child: _buildQuestionLabel('Learn')),
+          const SizedBox(height: 8),
           if (q.imageUrl != null) ...[
-            _buildImageCard(q.imageUrl!, size: 240),
-            const SizedBox(height: 18),
+            _buildImageCard(q.imageUrl!, size: 280),
+            const SizedBox(height: 8),
           ],
           Container(
             width: double.infinity,
@@ -934,7 +934,7 @@ class _ExerciseViewState extends State<ExerciseView>
               ],
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -943,34 +943,34 @@ class _ExerciseViewState extends State<ExerciseView>
   // ─── MCQ ────────────────────────────────────────────────────────────────
   Widget _buildMcqQuestion(LessonQuestion q) {
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildQuestionLabel('Question'),
-          const SizedBox(height: 18),
+          Center(child: _buildQuestionLabel('Question')),
+          const SizedBox(height: 8),
           Text(
             q.questionTitle,
             textAlign: TextAlign.center,
             style: const TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w900,
                 color: AppColors.textPrimary,
                 height: 1.25),
           ),
           if (q.imageUrl != null) ...[
-            const SizedBox(height: 18),
-            _buildImageCard(q.imageUrl!, size: 150),
+            const SizedBox(height: 8),
+            _buildImageCard(q.imageUrl!, size: 280),
           ],
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 2.25,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 2.5,
             ),
             itemCount: q.answers.length,
             itemBuilder: (context, index) {
@@ -999,15 +999,15 @@ class _ExerciseViewState extends State<ExerciseView>
   // ─── TRUE / FALSE ──────────────────────────────────────────────────────
   Widget _buildTrueFalseQuestion(LessonQuestion q) {
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildQuestionLabel('Question'),
-          const SizedBox(height: 18),
+          Center(child: _buildQuestionLabel('Question')),
+          const SizedBox(height: 8),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.card,
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
@@ -1017,17 +1017,17 @@ class _ExerciseViewState extends State<ExerciseView>
               q.questionTitle,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w900,
                   color: AppColors.textPrimary,
                   height: 1.25),
             ),
           ),
           if (q.imageUrl != null) ...[
-            const SizedBox(height: 18),
-            _buildImageCard(q.imageUrl!, size: 150),
+            const SizedBox(height: 8),
+            _buildImageCard(q.imageUrl!, size: 280),
           ],
-          const SizedBox(height: 28),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -1139,7 +1139,7 @@ class _ExerciseViewState extends State<ExerciseView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Question label with audio buttons (outside card, like web)
-          _buildQuestionLabel('Fill in the blank'),
+          Center(child: _buildQuestionLabel('Fill in the blank')),
           const SizedBox(height: 16),
 
           // Card container (web: bg-card border border-border rounded-xl p-4 sm:p-6)
@@ -1679,49 +1679,69 @@ class _ExerciseViewState extends State<ExerciseView>
     final audioUrl = _currentQuestion.audioUrl;
     final hasAudio = audioUrl != null && audioUrl.trim().isNotEmpty;
 
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (hasAudio) ...[
-          // Normal speed - filled purple circle
-          GestureDetector(
-            onTap: _audioLoading ? null : () => _playAudio(audioUrl),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: const BoxDecoration(
-                color: AppColors.accent,
-                shape: BoxShape.circle,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Normal speed - filled purple circle
+              GestureDetector(
+                onTap: _audioLoading ? null : () => _playAudio(audioUrl),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                    color: AppColors.accent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: _audioLoading
+                      ? const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
+                  )
+                      : FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Padding(
+                      padding: const EdgeInsets.all(11),
+                      child: SvgPicture.asset(
+                        'assets/nakhlah_web/icons/volume_icon.svg',
+                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              child: _audioLoading
-                  ? const Padding(
-                padding: EdgeInsets.all(8),
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.white),
-              )
-                  : const Icon(Icons.volume_up_rounded,
-                  color: Colors.white, size: 20),
-            ),
+              const SizedBox(width: 12),
+              // Slow speed - grey circle with turtle icon
+              GestureDetector(
+                onTap: _audioLoading
+                    ? null
+                    : () => _playAudio(audioUrl, speed: 0.6),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                    color: AppColors.optionBorderDefault,
+                    shape: BoxShape.circle,
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Padding(
+                      padding: const EdgeInsets.all(11),
+                      child: SvgPicture.asset(
+                        'assets/nakhlah_web/icons/turtle_icon.svg',
+                        colorFilter: const ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          // Slow speed - grey circle with turtle emoji
-          GestureDetector(
-            onTap: _audioLoading
-                ? null
-                : () => _playAudio(audioUrl, speed: 0.6),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.optionBorderDefault,
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text('🐢', style: TextStyle(fontSize: 18)),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
+          const SizedBox(height: 8),
         ],
         Text(
           label,
@@ -1735,7 +1755,7 @@ class _ExerciseViewState extends State<ExerciseView>
     );
   }
 
-  Widget _buildImageCard(String imageUrl, {double size = 240}) {
+  Widget _buildImageCard(String imageUrl, {double size = 280}) {
     return Center(
       child: SizedBox(
         width: size,
@@ -1886,65 +1906,67 @@ class _ExerciseViewState extends State<ExerciseView>
             thickness: 1,
             height: 1,
           ),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: AppTheme.buttonHeight,
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onPressed,
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: buttonColor,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: AppColors.buttonDisabled,
-                disabledForegroundColor: AppColors.buttonDisabledText,
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                  BorderRadius.circular(AppTheme.buttonRadius),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              TextButton(
+                onPressed: () {
+                  if (!_questionAnswered) {
+                    if (!_currentQuestion.isLearn) {
+                      _skippedIndices.add(_currentIndex);
+                    }
+                    _hasWrongAnswer = true;
+                  }
+                  if (_isLastQuestion) {
+                    if (_skippedIndices.isNotEmpty) {
+                      _isRevisitingSkipped = true;
+                      final nextSkipped = _skippedIndices.first;
+                      _skippedIndices.remove(nextSkipped);
+                      setState(() {
+                        _currentIndex = nextSkipped;
+                        _resetQuestionState();
+                      });
+                      _autoPlayAudio();
+                    } else {
+                      _completeLesson();
+                    }
+                  } else {
+                    setState(() {
+                      _currentIndex++;
+                      _resetQuestionState();
+                    });
+                    _autoPlayAudio();
+                  }
+                },
+                child: const Text('Skip',
+                    style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w800)),
+              ),
+              const Spacer(),
+              SizedBox(
+                height: AppTheme.buttonHeight,
+                width: 200,
+                child: ElevatedButton(
+                  onPressed: onPressed,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: buttonColor,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: AppColors.buttonDisabled,
+                    disabledForegroundColor: AppColors.buttonDisabledText,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(AppTheme.buttonRadius),
+                    ),
+                  ),
+                  child: Text(buttonLabel,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w900)),
                 ),
               ),
-              child: Text(buttonLabel,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w900)),
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () {
-              if (!_questionAnswered) {
-                // Only skip answer questions (not learn questions)
-                if (!_currentQuestion.isLearn) {
-                  _skippedIndices.add(_currentIndex);
-                }
-                _hasWrongAnswer = true;
-              }
-              // Move forward normally, don't jump to skipped
-              if (_isLastQuestion) {
-                if (_skippedIndices.isNotEmpty) {
-                  _isRevisitingSkipped = true;
-                  final nextSkipped = _skippedIndices.first;
-                  _skippedIndices.remove(nextSkipped);
-                  setState(() {
-                    _currentIndex = nextSkipped;
-                    _resetQuestionState();
-                  });
-                  _autoPlayAudio();
-                } else {
-                  _completeLesson();
-                }
-              } else {
-                setState(() {
-                  _currentIndex++;
-                  _resetQuestionState();
-                });
-                _autoPlayAudio();
-              }
-            },
-            child: const Text('Skip',
-                style: TextStyle(
-                    decoration: TextDecoration.underline,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w800)),
+            ],
           ),
         ],
       ),
