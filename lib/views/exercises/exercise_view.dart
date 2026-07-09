@@ -1368,22 +1368,25 @@ class _ExerciseViewState extends State<ExerciseView>
                 : _buildWordSelectedArea(previewWord),
           ),
           const SizedBox(height: 28),
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                for (final answer in sorted)
-                  _LetterTile(
-                    label: answer.title,
-                    active: !_usedTokenIds.contains(answer.id),
-                    onTap: _questionAnswered ||
-                            _usedTokenIds.contains(answer.id)
-                        ? null
-                        : () => _addToken(answer),
-                  ),
-              ],
+          Center(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                alignment: WrapAlignment.center,
+                children: [
+                  for (final answer in sorted)
+                    _LetterTile(
+                      label: answer.title,
+                      active: !_usedTokenIds.contains(answer.id),
+                      onTap: _questionAnswered ||
+                              _usedTokenIds.contains(answer.id)
+                          ? null
+                          : () => _addToken(answer),
+                    ),
+                ],
+              ),
             ),
           ),
         ],
