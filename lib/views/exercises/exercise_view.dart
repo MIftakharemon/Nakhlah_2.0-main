@@ -1429,38 +1429,39 @@ class _ExerciseViewState extends State<ExerciseView>
           ),
         ),
         const SizedBox(height: 8),
-        // Small token chips
-        Directionality(
-          textDirection: TextDirection.rtl,
-          child: SizedBox(
-            height: 40,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              reverse: true,
-              itemCount: _selectedTokens.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 6),
-              itemBuilder: (_, i) => GestureDetector(
-                onTap:
-                    _questionAnswered ? null : () => _removeToken(i),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                        color: AppColors.accent.withValues(alpha: 0.3)),
-                  ),
-                  child: Text(
-                    _selectedTokens[i].title,
-                    style: AppTheme.arabicTextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+        // Small token chips - centered
+        Center(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              alignment: WrapAlignment.center,
+              children: [
+                for (int i = 0; i < _selectedTokens.length; i++)
+                  GestureDetector(
+                    onTap:
+                        _questionAnswered ? null : () => _removeToken(i),
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                            color: AppColors.accent.withValues(alpha: 0.3)),
+                      ),
+                      child: Text(
+                        _selectedTokens[i].title,
+                        style: AppTheme.arabicTextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
+              ],
             ),
           ),
         ),
