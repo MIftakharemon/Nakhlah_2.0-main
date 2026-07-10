@@ -762,20 +762,7 @@ class _ExerciseViewState extends State<ExerciseView>
                 icon: const Icon(Icons.close_rounded,
                     color: AppColors.textPrimary),
               ),
-              // Progress bar
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: _progress,
-                    minHeight: 10,
-                    backgroundColor: AppColors.optionBorderDefault,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppColors.accent),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 4),
               // Palm trees in a pill container
               Container(
                 padding:
@@ -805,35 +792,44 @@ class _ExerciseViewState extends State<ExerciseView>
                   }),
                 ),
               ),
+              const Spacer(),
+              // Timer badge
+              Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.optionBorderDefault),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.access_time_rounded,
+                        size: 14, color: AppColors.accent),
+                    const SizedBox(width: 4),
+                    Text(
+                      _timerText,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 4),
-          // Timer badge right-aligned below the row
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.optionBorderDefault),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.access_time_rounded,
-                      size: 14, color: AppColors.accent),
-                  const SizedBox(width: 4),
-                  Text(
-                    _timerText,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
-              ),
+          const SizedBox(height: 8),
+          // Progress bar in its own row below
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: _progress,
+              minHeight: 10,
+              backgroundColor: AppColors.optionBorderDefault,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.accent),
             ),
           ),
         ],
