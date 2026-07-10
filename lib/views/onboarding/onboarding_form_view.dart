@@ -112,6 +112,18 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
   }
 
   Future<void> _submit() async {
+    print('[ONBOARDING] _submit called');
+    print('[ONBOARDING] email: $_email');
+    print('[ONBOARDING] fullName: $_fullName');
+    print('[ONBOARDING] contactNumber: $_contactNumber');
+    print('[ONBOARDING] profilePicture: ${_profilePicture?.path}');
+    print('[ONBOARDING] strengthId: $_strengthId');
+    print('[ONBOARDING] goalTime: $_goalTime');
+    print('[ONBOARDING] purposeId: $_purposeId');
+    print('[ONBOARDING] countryId: $_countryId');
+    print('[ONBOARDING] sourceId: $_sourceId');
+    print('[ONBOARDING] ageId: $_ageId');
+
     // If the user entered email/password in the form (not already signed up),
     // register them first so we have an auth token for the profile POST.
     final authUser = Get.isRegistered<AuthController>()
@@ -120,10 +132,13 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
     final existingEmail = authUser?.email ?? '';
 
     if (existingEmail.isEmpty && _email.isNotEmpty && _password.isNotEmpty) {
+      print('[ONBOARDING] Registering user...');
       final signedUp = await Get.find<AuthController>().signUp(
         _email.trim(),
         _password,
+        navigateToOnboarding: false,
       );
+      print('[ONBOARDING] signUp result: $signedUp');
       if (!signedUp) return;
     }
 
@@ -143,17 +158,26 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       languageStrength: strength?.title ?? _strengthId,
     );
 
+    print('[ONBOARDING] Creating onboarding profile...');
     final created = await _profileCtrl.createOnboarding(
       info,
       fullName: _fullName.trim(),
       contactNumber: _contactNumber.trim(),
     );
+    print('[ONBOARDING] createOnboarding result: $created');
 
     if (created && _profilePicture != null) {
-      await _profileCtrl.updateProfile(picture: _profilePicture);
+      print('[ONBOARDING] Uploading profile picture...');
+      await _profileCtrl.updateProfile(
+        fullName: _fullName.trim().isNotEmpty ? _fullName.trim() : null,
+        contactNumber: _contactNumber.trim().isNotEmpty ? _contactNumber.trim() : null,
+        onboardInfo: info,
+        picture: _profilePicture,
+      );
     }
 
     if (created) {
+      print('[ONBOARDING] Navigating to shell...');
       Get.offAllNamed(Routes.shell);
       Get.find<AppController>().setTab(0);
     }

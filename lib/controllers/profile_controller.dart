@@ -57,15 +57,21 @@ class ProfileController extends GetxController {
   }) async {
     try {
       loading.value = true;
+      print('[PROFILE] createOnboarding called');
+      print('[PROFILE] info: ${info.toJson()}');
+      print('[PROFILE] fullName: $fullName');
+      print('[PROFILE] contactNumber: $contactNumber');
       profile.value = await service.createProfile(
         info,
         fullName: fullName,
         contactNumber: contactNumber,
         profilePictureUrl: profilePictureUrl,
       );
+      print('[PROFILE] createOnboarding SUCCESS');
       AppSnackbar.success('Profile created.');
       return true;
     } catch (e) {
+      print('[PROFILE] createOnboarding ERROR: $e');
       AppSnackbar.error(e.toString());
       return false;
     } finally {
@@ -87,6 +93,20 @@ class ProfileController extends GetxController {
         onboardInfo: onboardInfo,
         picture: picture,
       );
+      await load();
+      return true;
+    } catch (e) {
+      AppSnackbar.error(e.toString());
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  Future<bool> updateProfilePicture(File picture) async {
+    try {
+      loading.value = true;
+      profile.value = await service.updateProfilePicture(picture);
       await load();
       return true;
     } catch (e) {
