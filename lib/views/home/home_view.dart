@@ -625,6 +625,7 @@ class _GlassStatsBar extends StatelessWidget {
               _HeaderIconValue(
                 icon: ActiveStreakIcon(size: 34),
                 value: streak,
+                onTap: () => _showStreakPopup(context, streak, gamification),
               ),
               _HeaderIconValue(
                 icon: DatesIcon(size: 34),
@@ -639,6 +640,169 @@ class _GlassStatsBar extends StatelessWidget {
             ],
           ),
         ),
+    );
+  }
+
+  void _showStreakPopup(
+      BuildContext context, int streakCount, GamificationController ctrl) {
+    final streakDates = ctrl.streak.value.streakDates;
+    final activities = <String, bool>{};
+    for (final entry in streakDates) {
+      if (entry.status == 'completed') {
+        activities[entry.date] = true;
+      }
+    }
+
+    final today = DateTime.now();
+    final days = List.generate(30, (i) {
+      return DateTime(today.year, today.month, today.day - (29 - i));
+    });
+
+    String dateKey(DateTime d) =>
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+    final isToday = DateTime(today.year, today.month, today.day);
+
+    final streakMessage = streakCount > 0
+        ? "You're on a $streakCount-day streak."
+        : 'Do a lesson today to start a new streak!';
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$streakCount day${streakCount == 1 ? '' : 's'} streak',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                streakMessage,
+                style: const TextStyle(
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Day headers
+              GridView.count(
+                crossAxisCount: 7,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 6,
+                crossAxisSpacing: 6,
+                childAspectRatio: 1,
+                children: [
+                  for (final day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'])
+                    Center(
+                      child: Text(
+                        day,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              // Calendar days grid
+              GridView.count(
+                crossAxisCount: 7,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 6,
+                crossAxisSpacing: 6,
+                childAspectRatio: 1,
+                children: days.map((date) {
+                  final key = dateKey(date);
+                  final hasActivity = activities[key] == true;
+                  final isDateToday = date == isToday;
+
+                  final bgColor = hasActivity
+                      ? null
+                      : isDateToday
+                          ? null
+                          : const Color(0xFFF0F0F0);
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      gradient: hasActivity
+                          ? const LinearGradient(
+                              colors: [Color(0xFFFF9800), Color(0xFFE65100)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      borderRadius: BorderRadius.circular(8),
+                      border: isDateToday && !hasActivity
+                          ? Border.all(color: const Color(0xFFFF9800), width: 2)
+                          : null,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${date.day}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: hasActivity
+                              ? Colors.white
+                              : null,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 12),
+              // Legend
+              Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F0F0),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text(
+                    'No activity',
+                    style: TextStyle(fontSize: 11),
+                  ),
+                  const SizedBox(width: 16),
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF9800), Color(0xFFE65100)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text(
+                    'Activity',
+                    style: TextStyle(fontSize: 11),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

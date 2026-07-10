@@ -744,19 +744,50 @@ class StreakModel {
     this.missedDays = 0,
     this.startDate,
     this.lastCompletedDate,
+    this.streakDates = const [],
   });
 
   final int currentStreak, missedDays;
   final String? startDate, lastCompletedDate;
+  final List<StreakDateEntry> streakDates;
 
   factory StreakModel.fromJson(dynamic value) {
     final j = _map(_unwrap(value));
     if (j == null) return const StreakModel();
+    final rawDates = _list(j['dates']);
     return StreakModel(
       currentStreak: _int(j['currentStreak']),
       missedDays: _int(j['missedDays']),
       startDate: j['startDate']?.toString(),
       lastCompletedDate: j['lastCompletedDate']?.toString(),
+      streakDates: rawDates.map((e) => StreakDateEntry.fromJson(e)).toList(),
+    );
+  }
+}
+
+class StreakDateEntry {
+  const StreakDateEntry({required this.date, required this.status});
+  final String date;
+  final String status;
+
+  factory StreakDateEntry.fromJson(dynamic value) {
+    final j = _map(value);
+    if (j != null) {
+      var rawDate = _string(j['date']);
+      // strip time portion if present (e.g. "2026-05-15T00:00:00.000Z")
+      final tIndex = rawDate.indexOf('T');
+      if (tIndex > 0) rawDate = rawDate.substring(0, tIndex);
+      return StreakDateEntry(
+        date: rawDate,
+        status: _string(j['status']).toLowerCase(),
+      );
+    }
+    // handle case where value is a plain date string
+    final raw = value?.toString() ?? '';
+    final tIndex = raw.indexOf('T');
+    return StreakDateEntry(
+      date: tIndex > 0 ? raw.substring(0, tIndex) : raw,
+      status: 'completed',
     );
   }
 }
