@@ -16,6 +16,7 @@ import '../../controllers/gamification_controller.dart';
 import '../../controllers/profile_controller.dart';
 import '../../models/models.dart';
 import '../../routes/app_routes.dart';
+import '../../widgets/nakhlah_icons.dart';
 import '../settings/settings_detail_view.dart';
 
 class ProfileView extends StatefulWidget {
@@ -382,11 +383,7 @@ class _ProfileViewState extends State<ProfileView> {
           children: [
             _buildStatCard(
               context,
-              SvgPicture.asset(
-                'assets/nakhlah_web/icons/active-streak.svg',
-                width: 24,
-                height: 24,
-              ),
+              const ActiveStreakIcon(size: 24),
               '${dca?.tasksCompleted ?? 0}',
               'Tasks Completed Today',
             ),
