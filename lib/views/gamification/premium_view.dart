@@ -70,7 +70,15 @@ class _PremiumViewState extends State<PremiumView> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () => Get.toNamed(Routes.payment),
+                      onPressed: () => Get.toNamed(Routes.payment, arguments: {
+                        'type': 'subscription',
+                        'plan': {
+                          'id': _selectedIndex == 0 ? '1' : _selectedIndex == 1 ? '3' : _selectedIndex == 2 ? '6' : '12',
+                          'duration': _plans[_selectedIndex].duration,
+                          'price': _plans[_selectedIndex].price,
+                          'interval': _selectedIndex == 3 ? 'year' : 'month',
+                        },
+                      }),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         foregroundColor: Colors.white,

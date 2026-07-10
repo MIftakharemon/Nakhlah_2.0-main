@@ -1,4 +1,3 @@
-import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,7 +14,7 @@ class StoreView extends StatefulWidget {
   State<StoreView> createState() => _StoreViewState();
 }
 
-class _StoreViewState extends State<StoreView> {
+class _StoreViewState extends State<StoreView> with WidgetsBindingObserver {
   List<Map<String, dynamic>> _datePackages = [];
   List<Map<String, dynamic>> _subscriptionPlans = [];
   Map<String, dynamic>? _currentSubscription;
@@ -24,12 +23,54 @@ class _StoreViewState extends State<StoreView> {
   String? _processingId;
   String? _error;
   late final PaymentService _paymentService;
+  bool _paymentInitiated = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _paymentService = PaymentService(Get.find<ApiService>());
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _paymentInitiated) {
+      _paymentInitiated = false;
+      _showPaymentReturnDialog();
+    }
+  }
+
+  void _showPaymentReturnDialog() {
+    Get.defaultDialog(
+      title: 'Payment',
+      middleText: 'Did you complete the payment?',
+      textConfirm: 'Yes',
+      textCancel: 'No',
+      confirmTextColor: Colors.white,
+      onConfirm: () {
+        Get.back();
+        Get.snackbar(
+          'Success',
+          'Payment completed! Your order will be processed shortly.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.palm,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        _loadData();
+      },
+      onCancel: () {
+        Get.back();
+        setState(() => _processingId = null);
+      },
+    );
   }
 
   Future<void> _loadData() async {
@@ -87,20 +128,20 @@ class _StoreViewState extends State<StoreView> {
 
   Future<void> _handleDateCheckout(Map<String, dynamic> pkg) async {
     final packageId = pkg['id']?.toString() ?? '';
-    developer.log('_handleDateCheckout: packageId=$packageId, pkg=$pkg', name: 'StoreView');
+    print('[STORE] _handleDateCheckout START | packageId=$packageId | pkg=$pkg');
     setState(() => _processingId = 'dates:$packageId');
 
     try {
-      developer.log('calling createDatePaymentOrder...', name: 'StoreView');
+      print('[STORE] createDatePaymentOrder calling API...');
       final result = await _paymentService.createDatePaymentOrder(packageId);
-      developer.log('createDatePaymentOrder returned: $result', name: 'StoreView');
+      print('[STORE] createDatePaymentOrder result: success=${result['success']} | error=${result['error']} | approvalUrl=${result['approvalUrl']}');
 
       if (!mounted) return;
 
       if (result['success'] != true) {
         setState(() => _processingId = null);
         final error = result['error'] ?? 'Unable to start PayPal checkout.';
-        developer.log('CHECKOUT FAILED: $error', name: 'StoreView');
+        print('[STORE] DATE CHECKOUT FAILED: $error');
         Get.snackbar(
           'Error',
           error,
@@ -110,10 +151,9 @@ class _StoreViewState extends State<StoreView> {
       }
 
       final approvalUrl = result['approvalUrl'];
-      developer.log('approvalUrl from result: $approvalUrl', name: 'StoreView');
       if (approvalUrl == null || approvalUrl.toString().isEmpty) {
         setState(() => _processingId = null);
-        developer.log('NO APPROVAL URL - showing error', name: 'StoreView');
+        print('[STORE] DATE CHECKOUT FAILED: approvalUrl is null or empty. result=$result');
         Get.snackbar(
           'Error',
           'No payment URL received from server.',
@@ -123,22 +163,23 @@ class _StoreViewState extends State<StoreView> {
       }
 
       final url = Uri.parse(approvalUrl.toString());
-      developer.log('Launching URL: $url', name: 'StoreView');
-      final canLaunch = await canLaunchUrl(url);
-      developer.log('canLaunchUrl=$canLaunch', name: 'StoreView');
-      if (canLaunch) {
+      print('[STORE] Parsed PayPal URL: $url');
+      _paymentInitiated = true;
+      try {
         await launchUrl(url, mode: LaunchMode.externalApplication);
-        developer.log('launchUrl succeeded', name: 'StoreView');
-      } else {
-        developer.log('canLaunchUrl returned false!', name: 'StoreView');
+        print('[STORE] launchUrl succeeded - browser opened');
+      } catch (e) {
+        _paymentInitiated = false;
+        print('[STORE] launchUrl FAILED: $e');
         Get.snackbar(
           'Error',
           'Cannot open PayPal. Please try again.',
           snackPosition: SnackPosition.BOTTOM,
         );
       }
-    } catch (e) {
-      developer.log('EXCEPTION in _handleDateCheckout: $e', name: 'StoreView');
+    } catch (e, stackTrace) {
+      print('[STORE] EXCEPTION in _handleDateCheckout: $e');
+      print('[STORE] StackTrace: $stackTrace');
       if (mounted) {
         Get.snackbar(
           'Error',
@@ -147,18 +188,18 @@ class _StoreViewState extends State<StoreView> {
         );
       }
     } finally {
-      if (mounted) setState(() => _processingId = null);
+      if (mounted && !_paymentInitiated) setState(() => _processingId = null);
     }
   }
 
   Future<void> _handleSubscriptionCheckout(Map<String, dynamic> plan) async {
     final planId = plan['id']?.toString() ?? '';
-    developer.log('_handleSubscriptionCheckout: planId=$planId, plan=$plan', name: 'StoreView');
+    print('[STORE] _handleSubscriptionCheckout START | planId=$planId | plan=$plan');
 
-    // Check if user already has this plan
     if (_currentSubscription != null &&
         _currentSubscription!['status'] != 'cancelled' &&
         _currentSubscription!['plan']?['id'] == planId) {
+      print('[STORE] User already has this plan, skipping');
       Get.snackbar(
         'Info',
         'You already have this plan.',
@@ -170,16 +211,16 @@ class _StoreViewState extends State<StoreView> {
     setState(() => _processingId = 'premium:$planId');
 
     try {
-      developer.log('calling createSubscriptionPayment...', name: 'StoreView');
+      print('[STORE] createSubscriptionPayment calling API...');
       final result = await _paymentService.createSubscriptionPayment(planId);
-      developer.log('createSubscriptionPayment returned: $result', name: 'StoreView');
+      print('[STORE] createSubscriptionPayment result: success=${result['success']} | error=${result['error']} | approvalUrl=${result['approvalUrl']}');
 
       if (!mounted) return;
 
       if (result['success'] != true) {
         setState(() => _processingId = null);
         final error = result['error'] ?? 'Unable to start PayPal subscription.';
-        developer.log('SUBSCRIPTION CHECKOUT FAILED: $error', name: 'StoreView');
+        print('[STORE] SUBSCRIPTION CHECKOUT FAILED: $error');
         Get.snackbar(
           'Error',
           error,
@@ -189,10 +230,9 @@ class _StoreViewState extends State<StoreView> {
       }
 
       final approvalUrl = result['approvalUrl'];
-      developer.log('approvalUrl from result: $approvalUrl', name: 'StoreView');
       if (approvalUrl == null || approvalUrl.toString().isEmpty) {
         setState(() => _processingId = null);
-        developer.log('NO APPROVAL URL - showing error', name: 'StoreView');
+        print('[STORE] SUBSCRIPTION CHECKOUT FAILED: approvalUrl is null or empty. result=$result');
         Get.snackbar(
           'Error',
           'No payment URL received from server.',
@@ -202,22 +242,23 @@ class _StoreViewState extends State<StoreView> {
       }
 
       final url = Uri.parse(approvalUrl.toString());
-      developer.log('Launching URL: $url', name: 'StoreView');
-      final canLaunch = await canLaunchUrl(url);
-      developer.log('canLaunchUrl=$canLaunch', name: 'StoreView');
-      if (canLaunch) {
+      print('[STORE] Parsed PayPal URL: $url');
+      _paymentInitiated = true;
+      try {
         await launchUrl(url, mode: LaunchMode.externalApplication);
-        developer.log('launchUrl succeeded', name: 'StoreView');
-      } else {
-        developer.log('canLaunchUrl returned false!', name: 'StoreView');
+        print('[STORE] launchUrl succeeded - browser opened');
+      } catch (e) {
+        _paymentInitiated = false;
+        print('[STORE] launchUrl FAILED: $e');
         Get.snackbar(
           'Error',
           'Cannot open PayPal. Please try again.',
           snackPosition: SnackPosition.BOTTOM,
         );
       }
-    } catch (e) {
-      developer.log('EXCEPTION in _handleSubscriptionCheckout: $e', name: 'StoreView');
+    } catch (e, stackTrace) {
+      print('[STORE] EXCEPTION in _handleSubscriptionCheckout: $e');
+      print('[STORE] StackTrace: $stackTrace');
       if (mounted) {
         Get.snackbar(
           'Error',
@@ -226,7 +267,7 @@ class _StoreViewState extends State<StoreView> {
         );
       }
     } finally {
-      if (mounted) setState(() => _processingId = null);
+      if (mounted && !_paymentInitiated) setState(() => _processingId = null);
     }
   }
 

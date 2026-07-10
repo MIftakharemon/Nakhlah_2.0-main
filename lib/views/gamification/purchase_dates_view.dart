@@ -230,7 +230,16 @@ class _DatePackCard extends StatelessWidget {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () => Get.toNamed(Routes.payment),
+                      onPressed: () => Get.toNamed(Routes.payment, arguments: {
+                        'type': 'date',
+                        'package': {
+                          'id': pack.dates.toString(),
+                          'name': pack.name,
+                          'price': pack.price,
+                          'dateAmount': pack.dates,
+                          'description': pack.description,
+                        },
+                      }),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         foregroundColor: Colors.white,

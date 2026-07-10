@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -25,6 +26,7 @@ Future<void> main() async {
   await _refreshSessionOnStartup();
   runApp(const NakhlahApp());
   _startSessionRefreshTimer();
+  _startDeepLinkListener();
 }
 
 Timer? _sessionRefreshTimer;
@@ -41,6 +43,21 @@ void _startSessionRefreshTimer() {
     if (!storage.isLoggedIn || !storage.isTokenExpired) return;
 
     await Get.find<ApiService>().refreshAccessToken();
+  });
+}
+
+void _startDeepLinkListener() {
+  final appLinks = AppLinks();
+  appLinks.uriLinkStream.listen((Uri uri) {
+    if (uri.scheme == 'nakhlah' && uri.host == 'payment') {
+      final orderId = uri.queryParameters['token'];
+      final path = uri.path;
+      if (path == '/success' && orderId != null) {
+        // PaymentView handles capture via its own listener
+      } else if (path == '/cancel') {
+        Get.snackbar('Cancelled', 'Payment was cancelled.', snackPosition: SnackPosition.BOTTOM);
+      }
+    }
   });
 }
 

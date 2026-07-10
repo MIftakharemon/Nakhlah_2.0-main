@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,31 +18,31 @@ class PaymentView extends StatefulWidget {
   State<PaymentView> createState() => _PaymentViewState();
 }
 
-class _PaymentViewState extends State<PaymentView> with WidgetsBindingObserver {
+class _PaymentViewState extends State<PaymentView> {
   late final PaymentService _paymentService;
   late final dynamic _args;
+  StreamSubscription<Uri>? _linkSub;
 
   bool _isProcessing = false;
   String? _error;
-  bool _paymentInitiated = false;
+  bool _hasCaptured = false;
 
-  // Args from store page
-  String _paymentType = 'date'; // 'date' or 'subscription'
+  String _paymentType = 'date';
   Map<String, dynamic>? _package;
   Map<String, dynamic>? _plan;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _paymentService = PaymentService(Get.find<ApiService>());
     _args = Get.arguments;
     _parseArgs();
+    _listenForDeepLink();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    _linkSub?.cancel();
     super.dispose();
   }
 
@@ -51,50 +54,88 @@ class _PaymentViewState extends State<PaymentView> with WidgetsBindingObserver {
     }
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // When user returns from PayPal browser
-    if (state == AppLifecycleState.resumed && _paymentInitiated) {
-      _paymentInitiated = false;
-      _showPaymentReturnDialog();
+  void _listenForDeepLink() {
+    final appLinks = AppLinks();
+    print('[PAYMENT] _listenForDeepLink: setting up deep link listener');
+    _linkSub = appLinks.uriLinkStream.listen((Uri uri) {
+      print('[PAYMENT] Deep link received: $uri');
+      if (uri.scheme == 'nakhlah' && uri.host == 'payment') {
+        final orderId = uri.queryParameters['token'];
+        final path = uri.path;
+        print('[PAYMENT] Deep link path=$path | orderId=$orderId');
+        if (path == '/success' && orderId != null && !_hasCaptured) {
+          print('[PAYMENT] Payment success deep link - capturing order: $orderId');
+          _captureAndFinish(orderId);
+        } else if (path == '/cancel') {
+          print('[PAYMENT] Payment cancelled via deep link');
+          setState(() {
+            _isProcessing = false;
+          });
+          Get.snackbar('Cancelled', 'Payment was cancelled.', snackPosition: SnackPosition.BOTTOM);
+        }
+      }
+    }, onError: (e) {
+      print('[PAYMENT] Deep link stream error: $e');
+    });
+    _checkInitialLink(appLinks);
+  }
+
+  Future<void> _checkInitialLink(AppLinks appLinks) async {
+    try {
+      print('[PAYMENT] Checking initial deep link...');
+      final uri = await appLinks.getInitialLink();
+      print('[PAYMENT] Initial link: $uri');
+      if (uri != null && uri.scheme == 'nakhlah' && uri.host == 'payment') {
+        final orderId = uri.queryParameters['token'];
+        final path = uri.path;
+        if (path == '/success' && orderId != null && !_hasCaptured) {
+          print('[PAYMENT] Initial deep link success - capturing order: $orderId');
+          _captureAndFinish(orderId);
+        }
+      }
+    } catch (e) {
+      print('[PAYMENT] _checkInitialLink error: $e');
     }
   }
 
-  void _showPaymentReturnDialog() {
-    Get.defaultDialog(
-      title: 'Payment',
-      middleText: 'Did you complete the payment?',
-      textConfirm: 'Yes',
-      textCancel: 'No',
-      confirmTextColor: Colors.white,
-      onConfirm: () {
-        Get.back(); // close dialog
-        _showSuccessAndGoBack();
-      },
-      onCancel: () {
-        Get.back(); // close dialog
-        setState(() => _isProcessing = false);
-      },
-    );
-  }
+  Future<void> _captureAndFinish(String orderId) async {
+    if (_hasCaptured) {
+      print('[PAYMENT] _captureAndFinish skipped - already captured');
+      return;
+    }
+    _hasCaptured = true;
+    setState(() => _isProcessing = true);
+    print('[PAYMENT] _captureAndFinish: calling captureDatePaymentOrder with orderId=$orderId');
 
-  void _showSuccessAndGoBack() {
-    Get.snackbar(
-      'Success',
-      _paymentType == 'date'
-          ? 'Payment completed! Your dates will be added shortly.'
-          : 'Subscription activated! Enjoy premium features.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.palm,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
-    // Navigate back to store tab
-    Get.back(); // close payment page
-    Get.find<AppController>().setTab(2); // go to store tab
+    final result = await _paymentService.captureDatePaymentOrder(orderId);
+    print('[PAYMENT] captureDatePaymentOrder result: $result');
+    if (!mounted) return;
+
+    if (result['success'] == true) {
+      print('[PAYMENT] Payment captured successfully');
+      Get.snackbar(
+        'Success',
+        _paymentType == 'date'
+            ? 'Payment confirmed! Your dates have been added.'
+            : 'Subscription activated!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.palm,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+      Get.back();
+      Get.find<AppController>().setTab(2);
+    } else {
+      print('[PAYMENT] Payment capture FAILED: ${result['error']}');
+      setState(() {
+        _isProcessing = false;
+        _error = 'Payment verification failed. Please try again.';
+      });
+    }
   }
 
   Future<void> _handlePayPalCheckout() async {
+    print('[PAYMENT] _handlePayPalCheckout START | type=$_paymentType | package=$_package | plan=$_plan');
     setState(() {
       _isProcessing = true;
       _error = null;
@@ -105,7 +146,9 @@ class _PaymentViewState extends State<PaymentView> with WidgetsBindingObserver {
 
       if (_paymentType == 'date' && _package != null) {
         final packageId = _package!['id']?.toString() ?? '';
+        print('[PAYMENT] Creating date payment order for packageId=$packageId');
         final result = await _paymentService.createDatePaymentOrder(packageId);
+        print('[PAYMENT] createDatePaymentOrder result: success=${result['success']} | error=${result['error']} | approvalUrl=${result['approvalUrl']}');
         if (result['success'] != true) {
           setState(() {
             _error = result['error'] ?? 'Failed to create payment order.';
@@ -116,7 +159,9 @@ class _PaymentViewState extends State<PaymentView> with WidgetsBindingObserver {
         approvalUrl = result['approvalUrl'];
       } else if (_paymentType == 'subscription' && _plan != null) {
         final planId = _plan!['id']?.toString() ?? '';
+        print('[PAYMENT] Creating subscription payment for planId=$planId');
         final result = await _paymentService.createSubscriptionPayment(planId);
+        print('[PAYMENT] createSubscriptionPayment result: success=${result['success']} | error=${result['error']} | approvalUrl=${result['approvalUrl']}');
         if (result['success'] != true) {
           setState(() {
             _error = result['error'] ?? 'Failed to create subscription.';
@@ -125,9 +170,12 @@ class _PaymentViewState extends State<PaymentView> with WidgetsBindingObserver {
           return;
         }
         approvalUrl = result['approvalUrl'];
+      } else {
+        print('[PAYMENT] ERROR: paymentType=$_paymentType but package/plan is null');
       }
 
       if (approvalUrl == null || approvalUrl.isEmpty) {
+        print('[PAYMENT] ERROR: approvalUrl is null or empty');
         setState(() {
           _error = 'Payment URL not received. Please try again.';
           _isProcessing = false;
@@ -135,18 +183,21 @@ class _PaymentViewState extends State<PaymentView> with WidgetsBindingObserver {
         return;
       }
 
-      // Open PayPal in browser
       final url = Uri.parse(approvalUrl);
-      if (await canLaunchUrl(url)) {
-        _paymentInitiated = true;
+      print('[PAYMENT] Parsed PayPal URL: $url');
+      try {
         await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
+        print('[PAYMENT] launchUrl succeeded - browser opened');
+      } catch (e) {
+        print('[PAYMENT] launchUrl FAILED: $e');
         setState(() {
           _error = 'Could not open payment page.';
           _isProcessing = false;
         });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('[PAYMENT] EXCEPTION in _handlePayPalCheckout: $e');
+      print('[PAYMENT] StackTrace: $stackTrace');
       setState(() {
         _error = 'An unexpected error occurred.';
         _isProcessing = false;
