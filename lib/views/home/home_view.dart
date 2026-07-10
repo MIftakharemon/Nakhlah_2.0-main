@@ -11,6 +11,7 @@ import '../../common/empty_state.dart';
 import '../../common/loading_state.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
+import '../../controllers/app_controller.dart';
 import '../../controllers/content_controller.dart';
 import '../../controllers/gamification_controller.dart';
 import '../../controllers/profile_controller.dart';
@@ -625,7 +626,11 @@ class _GlassStatsBar extends StatelessWidget {
                 icon: ActiveStreakIcon(size: 34),
                 value: streak,
               ),
-              _HeaderIconValue(icon: DatesIcon(size: 34), value: dates),
+              _HeaderIconValue(
+                icon: DatesIcon(size: 34),
+                value: dates,
+                onTap: () => _showDatesPopup(context, dates),
+              ),
               _HeaderIconValue(
                 icon: PalmTreeIcon(size: 34),
                 value: palms,
@@ -634,6 +639,104 @@ class _GlassStatsBar extends StatelessWidget {
             ],
           ),
         ),
+    );
+  }
+
+  void _showDatesPopup(BuildContext context, int datesCount) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const NakhlahTreasureChestIcon(size: 96),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Dates',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'You have $datesCount dates',
+                          style: const TextStyle(
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 36,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Get.back();
+                              Get.find<AppController>().setTab(2);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF7D49DF),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Go To Shop',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7D49DF).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Daily Reward',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Complete a lesson today to earn extra dates!',
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
