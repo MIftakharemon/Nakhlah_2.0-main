@@ -138,19 +138,89 @@ class ApiService {
     File? file,
     String fileField = 'file',
     bool auth = true,
+    Map<String, String>? extraHeaders,
   }) async {
     Future<http.Response> request() async {
-      final req = http.MultipartRequest(method.toUpperCase(), _uri(p));
-      req.headers.addAll(_headers(auth: auth, json: false));
-      req.fields.addAll(fields);
-      if (file != null) {
-        req.files.add(await http.MultipartFile.fromPath(fileField, file.path));
+      // Build multipart body manually using dart:io to match browser FormData exactly.
+      final uri = _uri(p);
+      final boundary = '----FlutterBoundary${DateTime.now().millisecondsSinceEpoch}';
+      final token = _storage.token;
+      final cookies = _storage.cookies;
+
+      final bodyBytes = <int>[];
+
+      // Add text fields
+      for (final entry in fields.entries) {
+        bodyBytes.addAll('--$boundary\r\n'.codeUnits);
+        bodyBytes.addAll(
+          'Content-Disposition: form-data; name="${entry.key}"\r\n\r\n'.codeUnits,
+        );
+        bodyBytes.addAll('${entry.value}\r\n'.codeUnits);
       }
-      final streamed = await req.send().timeout(_timeout);
-      return http.Response.fromStream(streamed);
+
+      // Add file field
+      if (file != null) {
+        final fileBytes = await file.readAsBytes();
+        final fileName = file.path.split('/').last;
+        final contentType = _mimeFromPath(file.path);
+        bodyBytes.addAll('--$boundary\r\n'.codeUnits);
+        bodyBytes.addAll(
+          'Content-Disposition: form-data; name="$fileField"; filename="$fileName"\r\n'
+              .codeUnits,
+        );
+        bodyBytes.addAll('Content-Type: $contentType\r\n\r\n'.codeUnits);
+        bodyBytes.addAll(fileBytes);
+        bodyBytes.addAll('\r\n'.codeUnits);
+      }
+
+      bodyBytes.addAll('--$boundary--\r\n'.codeUnits);
+
+      // Send using dart:io HttpClient for full control
+      final client = HttpClient();
+      try {
+        final request = await client.openUrl(method, uri);
+        request.headers.set('Authorization', 'Bearer $token');
+        if (cookies != null && cookies.isNotEmpty) {
+          request.headers.set('Cookie', cookies);
+        }
+        if (extraHeaders != null) {
+          for (final entry in extraHeaders.entries) {
+            request.headers.set(entry.key, entry.value);
+          }
+        }
+        request.headers.contentType = ContentType('multipart', 'form-data', parameters: {'boundary': boundary});
+        request.add(bodyBytes);
+
+        final response = await request.close().timeout(_timeout);
+        final responseBody = await response.transform(utf8.decoder).join();
+
+        print('[API] multipart $method $uri fields=${fields.keys.toList()} file=$fileField status=${response.statusCode}');
+        print('[API] multipart ${response.statusCode} body=${responseBody.length > 500 ? responseBody.substring(0, 500) + '...' : responseBody}');
+
+        final respHeaders = <String, String>{};
+        response.headers.forEach((key, values) {
+          respHeaders[key] = values.join(', ');
+        });
+        return http.Response(responseBody, response.statusCode, headers: respHeaders);
+      } finally {
+        client.close();
+      }
     }
 
     return _send(request, auth: auth, path: p);
+  }
+
+  /// Simple MIME type detection from file extension.
+  String _mimeFromPath(String path) {
+    final ext = path.split('.').last.toLowerCase();
+    return {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'webp': 'image/webp',
+      'pdf': 'application/pdf',
+    }[ext] ?? 'application/octet-stream';
   }
 
   /// Refresh the saved access token immediately.

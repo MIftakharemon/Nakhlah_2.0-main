@@ -26,6 +26,22 @@ class ProfileService {
     String? contactNumber,
     String? profilePictureUrl,
   }) async {
+    // Check if profile already exists (API may auto-create during registration)
+    try {
+      final existing = await getProfile();
+      if (existing != null) {
+        print('[PROFILE] Profile exists, using PATCH instead of POST');
+        return await updateProfile(
+          fullName: fullName,
+          contactNumber: contactNumber,
+          onboardInfo: info,
+        );
+      }
+    } catch (_) {
+      // Profile doesn't exist, continue with POST
+    }
+
+    print('[PROFILE] Creating new profile with POST');
     final body = <String, dynamic>{
       'onboardInfo': info.toJson(),
       if (fullName != null && fullName.trim().isNotEmpty)
@@ -51,14 +67,44 @@ class ProfileService {
     if (contactNumber != null) data['contactNumber'] = contactNumber;
     if (onboardInfo != null) data['onboardInfo'] = onboardInfo.toJson();
 
-    return UserProfileModel.fromJson(
-      await _api.multipartPatch(
+    final dataJson = jsonEncode(data);
+    print('[PROFILE] updateProfile called');
+    print('[PROFILE] fields data: $dataJson');
+    print('[PROFILE] picture file: ${picture?.path}');
+    print('[PROFILE] fileField: profilePicture');
+
+    try {
+      final result = await _api.multipartPatch(
         ApiEndpoints.updateProfile,
-        fields: {'data': jsonEncode(data)},
+        fields: {'data': dataJson},
         file: picture,
         fileField: 'profilePicture',
-      ),
-    );
+      );
+      print('[PROFILE] updateProfile SUCCESS: $result');
+      return UserProfileModel.fromJson(result);
+    } catch (e) {
+      print('[PROFILE] updateProfile ERROR: $e');
+      rethrow;
+    }
+  }
+
+  Future<UserProfileModel> updateProfilePicture(File picture) async {
+    print('[PROFILE] updateProfilePicture called');
+    print('[PROFILE] picture file: ${picture.path}');
+
+    try {
+      final result = await _api.multipartPatch(
+        ApiEndpoints.updateProfile,
+        fields: {'data': '{}'},
+        file: picture,
+        fileField: 'profilePicture',
+      );
+      print('[PROFILE] updateProfilePicture SUCCESS: $result');
+      return UserProfileModel.fromJson(result);
+    } catch (e) {
+      print('[PROFILE] updateProfilePicture ERROR: $e');
+      rethrow;
+    }
   }
 
   Future<void> deleteProfile() => _api.delete(ApiEndpoints.deleteProfile);

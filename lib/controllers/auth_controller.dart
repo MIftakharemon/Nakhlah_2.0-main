@@ -27,14 +27,26 @@ class AuthController extends GetxController {
     return true;
   });
 
-  Future<bool> signUp(String email, String password) => _run(() async {
-    if (!_validateCredentials(email, password)) return false;
+  Future<bool> signUp(String email, String password, {bool navigateToOnboarding = true}) => _run(() async {
+    print('[AUTH] signUp called with email: $email');
+    if (!_validateCredentials(email, password)) {
+      print('[AUTH] signUp validation failed');
+      return false;
+    }
 
-    final s = await auth.signUp(email, password);
-    user.value = s.user;
-    AppSnackbar.success(s.message ?? 'Account created');
-    Get.offAllNamed(Routes.onboardingForm);
-    return true;
+    try {
+      final s = await auth.signUp(email, password);
+      print('[AUTH] signUp SUCCESS: token=${s.token != null}, message=${s.message}');
+      user.value = s.user;
+      AppSnackbar.success(s.message ?? 'Account created');
+      if (navigateToOnboarding) {
+        Get.offAllNamed(Routes.onboardingForm);
+      }
+      return true;
+    } catch (e) {
+      print('[AUTH] signUp ERROR: $e');
+      rethrow;
+    }
   });
 
   Future<bool> googleLogin({

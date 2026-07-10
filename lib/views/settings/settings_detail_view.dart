@@ -375,7 +375,8 @@ class _SettingsDetailViewState extends State<SettingsDetailView> {
         imageQuality: 85,
       );
       if (picked == null) return;
-      setState(() => _pickedFile = File(picked.path));
+      final file = File(picked.path);
+      setState(() => _pickedFile = file);
     } catch (e) {
       AppSnackbar.error('Could not pick image.');
     }
@@ -398,6 +399,12 @@ class _SettingsDetailViewState extends State<SettingsDetailView> {
     final p = Get.find<ProfileController>();
     final onboardInfo = p.profile.value?.onboardInfo ?? const OnboardInfo();
 
+    print('[SETTINGS] _updateProfile called');
+    print('[SETTINGS] fullName: ${_name.text.trim()}');
+    print('[SETTINGS] contactNumber: ${_phone.text.trim()}');
+    print('[SETTINGS] country: $_country');
+    print('[SETTINGS] picture: ${_pickedFile?.path}');
+
     final ok = await p.updateProfile(
       fullName: _name.text.trim().isEmpty ? null : _name.text.trim(),
       contactNumber: _phone.text.trim().isEmpty ? null : _phone.text.trim(),
@@ -411,6 +418,9 @@ class _SettingsDetailViewState extends State<SettingsDetailView> {
       ),
       picture: _pickedFile,
     );
+
+    print('[SETTINGS] updateProfile result: ok=$ok');
+
     if (ok && mounted) {
       setState(() => _pictureVersion++);
       Get.back();
