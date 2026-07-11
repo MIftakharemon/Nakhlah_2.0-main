@@ -2189,8 +2189,6 @@ class _MatchTile extends StatelessWidget {
         : AppColors.card;
     final foreground = wrong
         ? AppColors.wrongRed
-        : selected
-        ? Colors.white
         : AppColors.textPrimary;
 
     return Padding(
