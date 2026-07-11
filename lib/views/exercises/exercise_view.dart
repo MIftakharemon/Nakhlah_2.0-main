@@ -495,7 +495,10 @@ class _ExerciseViewState extends State<ExerciseView>
   }
 
   void _autoPlayAudio() {
-    // Audio only plays on user click via the sound icon button
+    final audioUrl = _currentQuestion.audioUrl;
+    if (audioUrl != null && audioUrl.trim().isNotEmpty) {
+      _playAudio(audioUrl);
+    }
   }
 
   Future<void> _playAudio(String url, {double speed = 1.0}) async {
