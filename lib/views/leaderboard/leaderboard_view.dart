@@ -39,8 +39,10 @@ class LeaderboardView extends StatefulWidget {
 
 class _LeaderboardViewState extends State<LeaderboardView> {
   final ProfileController controller = Get.find<ProfileController>();
-  bool _showProfile = false;
-  LeaderboardEntryModel? _selectedUser;
+
+  // will be implemented in version 2
+  // bool _showProfile = false;
+  // LeaderboardEntryModel? _selectedUser;
 
   @override
   void initState() {
@@ -48,35 +50,41 @@ class _LeaderboardViewState extends State<LeaderboardView> {
     controller.loadLeaderboard();
   }
 
-  void _viewProfile(LeaderboardEntryModel user) {
-    setState(() {
-      _selectedUser = user;
-      _showProfile = true;
-    });
-  }
+  // will be implemented in version 2
+  // void _viewProfile(LeaderboardEntryModel user) {
+  //   setState(() {
+  //     _selectedUser = user;
+  //     _showProfile = true;
+  //   });
+  // }
 
-  void _backToLeaderboard() {
-    setState(() {
-      _showProfile = false;
-      _selectedUser = null;
-    });
-  }
+  // will be implemented in version 2
+  // void _backToLeaderboard() {
+  //   setState(() {
+  //     _showProfile = false;
+  //     _selectedUser = null;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: _showProfile && _selectedUser != null
-          ? UserProfilePage(
-              key: const ValueKey('profile'),
-              user: _selectedUser!,
-              onBack: _backToLeaderboard,
-            )
-          : _LeaderboardList(
-              key: const ValueKey('list'),
-              controller: controller,
-              onViewProfile: _viewProfile,
-            ),
+    // will be implemented in version 2 — AnimatedSwitcher + UserProfilePage
+    // return AnimatedSwitcher(
+    //   duration: const Duration(milliseconds: 300),
+    //   child: _showProfile && _selectedUser != null
+    //       ? UserProfilePage(
+    //           key: const ValueKey('profile'),
+    //           user: _selectedUser!,
+    //           onBack: _backToLeaderboard,
+    //         )
+    //       : _LeaderboardList(
+    //           key: const ValueKey('list'),
+    //           controller: controller,
+    //           onViewProfile: _viewProfile,
+    //         ),
+    // );
+    return _LeaderboardList(
+      controller: controller,
     );
   }
 }
@@ -89,11 +97,13 @@ class _LeaderboardList extends StatelessWidget {
   const _LeaderboardList({
     super.key,
     required this.controller,
-    required this.onViewProfile,
+    // will be implemented in version 2
+    // this.onViewProfile,
   });
 
   final ProfileController controller;
-  final void Function(LeaderboardEntryModel) onViewProfile;
+  // will be implemented in version 2
+  // final void Function(LeaderboardEntryModel) onViewProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +173,8 @@ class _LeaderboardList extends StatelessWidget {
                     if (topThree.length >= 3)
                       _Podium(
                         entries: topThree,
-                        onTap: onViewProfile,
+                        // will be implemented in version 2
+                        // onTap: onViewProfile,
                       ),
                     const SizedBox(height: 24),
 
@@ -176,7 +187,8 @@ class _LeaderboardList extends StatelessWidget {
                         child: _LeaderboardRow(
                           entry: entry,
                           colorIndex: index + 3,
-                          onTap: () => onViewProfile(entry),
+                          // will be implemented in version 2
+                          // onTap: () => onViewProfile(entry),
                         ),
                       );
                     }),
@@ -197,10 +209,11 @@ class _LeaderboardList extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _Podium extends StatelessWidget {
-  const _Podium({required this.entries, required this.onTap});
+  const _Podium({required this.entries, /* will be implemented in version 2 this.onTap */});
 
   final List<LeaderboardEntryModel> entries;
-  final void Function(LeaderboardEntryModel) onTap;
+  // will be implemented in version 2
+  // final void Function(LeaderboardEntryModel) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -215,51 +228,45 @@ class _Podium extends StatelessWidget {
         children: [
           // ── 2nd Place ──────────────────────────────────────────
           Expanded(
-            child: GestureDetector(
-              onTap: () => onTap(second),
-              child: Column(
-                children: [
-                  _PodiumAvatar(entry: second, size: 72, colorIndex: 1),
-                  const SizedBox(height: 8),
-                  _NameCard(entry: second),
-                  const SizedBox(height: 8),
-                  _PodiumBlock(place: 2, height: 88, color: Colors.grey.shade300),
-                ],
-              ),
+            // will be implemented in version 2 — GestureDetector(onTap: () => onTap(second))
+            child: Column(
+              children: [
+                _PodiumAvatar(entry: second, size: 72, colorIndex: 1),
+                const SizedBox(height: 8),
+                _NameCard(entry: second),
+                const SizedBox(height: 8),
+                _PodiumBlock(place: 2, height: 88, color: Colors.grey.shade300),
+              ],
             ),
           ),
           const SizedBox(width: 12),
 
           // ── 1st Place (elevated) ───────────────────────────────
           Expanded(
-            child: GestureDetector(
-              onTap: () => onTap(first),
-              child: Column(
-                children: [
-                  _PodiumAvatar(entry: first, size: 88, colorIndex: 0),
-                  const SizedBox(height: 8),
-                  _NameCard(entry: first, large: true),
-                  const SizedBox(height: 8),
-                  _PodiumBlock(place: 1, height: 120, color: const Color(0xFF8B5CF6)),
-                ],
-              ),
+            // will be implemented in version 2 — GestureDetector(onTap: () => onTap(first))
+            child: Column(
+              children: [
+                _PodiumAvatar(entry: first, size: 88, colorIndex: 0),
+                const SizedBox(height: 8),
+                _NameCard(entry: first, large: true),
+                const SizedBox(height: 8),
+                _PodiumBlock(place: 1, height: 120, color: const Color(0xFF8B5CF6)),
+              ],
             ),
           ),
           const SizedBox(width: 12),
 
           // ── 3rd Place ──────────────────────────────────────────
           Expanded(
-            child: GestureDetector(
-              onTap: () => onTap(third),
-              child: Column(
-                children: [
-                  _PodiumAvatar(entry: third, size: 72, colorIndex: 2),
-                  const SizedBox(height: 8),
-                  _NameCard(entry: third),
-                  const SizedBox(height: 8),
-                  _PodiumBlock(place: 3, height: 68, color: const Color(0xFFD97706)),
-                ],
-              ),
+            // will be implemented in version 2 — GestureDetector(onTap: () => onTap(third))
+            child: Column(
+              children: [
+                _PodiumAvatar(entry: third, size: 72, colorIndex: 2),
+                const SizedBox(height: 8),
+                _NameCard(entry: third),
+                const SizedBox(height: 8),
+                _PodiumBlock(place: 3, height: 68, color: const Color(0xFFD97706)),
+              ],
             ),
           ),
         ],
@@ -437,12 +444,14 @@ class _LeaderboardRow extends StatelessWidget {
   const _LeaderboardRow({
     required this.entry,
     required this.colorIndex,
-    required this.onTap,
+    // will be implemented in version 2
+    // this.onTap,
   });
 
   final LeaderboardEntryModel entry;
   final int colorIndex;
-  final VoidCallback onTap;
+  // will be implemented in version 2
+  // final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -450,12 +459,8 @@ class _LeaderboardRow extends StatelessWidget {
     final colors = _gradientFor(colorIndex);
     final imageUrl = entry.absolutePictureUrl;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
+    // will be implemented in version 2 — InkWell(onTap: onTap)
+    return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: dc.cardBackground,
@@ -552,8 +557,6 @@ class _LeaderboardRow extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
     );
   }
 }
