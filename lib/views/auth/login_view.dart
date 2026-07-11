@@ -53,7 +53,7 @@ class _LoginViewState extends State<LoginView> {
     final c = Get.find<AuthController>();
 
     return IntroScaffold(
-      showBack: true,
+      showBack: false,
       showWordmark: false,
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 8, bottom: 24),
