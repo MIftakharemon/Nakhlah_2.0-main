@@ -96,6 +96,7 @@ class _LoginViewState extends State<LoginView> {
                           setState(() => _obscure = !_obscure),
                     ),
                   ),
+                  const SizedBox(height: 12),
                   // Remember me + forgot password
                   Row(
                     children: [
