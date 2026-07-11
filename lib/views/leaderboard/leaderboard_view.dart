@@ -109,7 +109,7 @@ class _LeaderboardList extends StatelessWidget {
   Widget build(BuildContext context) {
     final dc = DarkModeColors.of(context);
     return Scaffold(
-      backgroundColor: dc.cardBackground,
+      backgroundColor: dc.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -592,7 +592,7 @@ class UserProfilePage extends StatelessWidget {
     final colors = _gradientFor(user.rank - 1);
 
     return Scaffold(
-      backgroundColor: dc.cardBackground,
+      backgroundColor: dc.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

@@ -49,7 +49,7 @@ class _HomeViewState extends State<HomeView> {
     final gamification = Get.find<GamificationController>();
 
     return Scaffold(
-      backgroundColor: DarkModeColors.of(context).cardBackground,
+      backgroundColor: DarkModeColors.of(context).scaffoldBackground,
       body: RefreshIndicator(
         color: const Color(0xFF7D49DF),
         onRefresh: () async {
