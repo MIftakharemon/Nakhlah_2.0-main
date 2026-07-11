@@ -1230,7 +1230,7 @@ class _GateBanner extends StatelessWidget {
                     color: Colors.white,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    height: 4.2,
+                    height: 4.7,
                     shadows: [
                       Shadow(
                         color: Color(0x66000000),
