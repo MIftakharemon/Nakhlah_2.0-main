@@ -101,6 +101,8 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
         duration: _pageTransitionDuration,
         curve: _pageTransitionCurve,
       );
+    } else {
+      Get.offAllNamed(Routes.getStarted);
     }
   }
 
@@ -190,21 +192,17 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       showWordmark: false,
       child: Column(
         children: [
-          AnimatedOpacity(
-            opacity: _step > 0 ? 1.0 : 0.0,
-            duration: AppMotion.fast,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: _step > 0 ? _back : null,
-                icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                label: const Text('Back'),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.accent,
-                  textStyle: const TextStyle(fontWeight: FontWeight.w900),
-                  minimumSize: Size.zero,
-                  padding: EdgeInsets.zero,
-                ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: _back,
+              icon: const Icon(Icons.arrow_back_rounded, size: 18),
+              label: const Text('Back'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.accent,
+                textStyle: const TextStyle(fontWeight: FontWeight.w900),
+                minimumSize: Size.zero,
+                padding: EdgeInsets.zero,
               ),
             ),
           ),
