@@ -1305,22 +1305,88 @@ class _LessonNodePosition extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // SVG Node
 // ---------------------------------------------------------------------------
+// OLD STONE VERSION (kept for reference — next version may reuse):
+//
+// class _SvgNode extends StatelessWidget {
+//   const _SvgNode({required this.node});
+//   final _PathNodeData node;
+//   @override
+//   Widget build(BuildContext context) {
+//     final isTrophy = node.type == _PathNodeType.trophy;
+//     String assetPath;
+//     if (isTrophy) {
+//       assetPath = 'assets/nakhlah_web/icons/mystery_box_locked.svg';
+//     } else if (node.isLocked) {
+//       assetPath = 'assets/nakhlah_web/icons/Task_locked.svg';
+//     } else {
+//       assetPath = 'assets/nakhlah_web/icons/Task_unlocked.svg';
+//     }
+//     return GestureDetector(
+//       onTap: node.isLocked ? null : () {
+//         final box = GetStorage();
+//         box.write(_kLastInteractedNodeIdKey, node.apiId);
+//         if (isTrophy) {
+//           _showGiftBoxDialog(context, node.apiId, isCompleted: node.isCompleted);
+//         } else {
+//           _showLessonChooserDialog(context, node.apiId);
+//         }
+//       },
+//       child: PressableScale(
+//         scale: node.isLocked ? 1 : .91,
+//         child: SizedBox(
+//           width: isTrophy ? 80 : 90,
+//           height: isTrophy ? 80 : 90,
+//           child: SvgPicture.asset(assetPath, fit: BoxFit.contain),
+//         ),
+//       ),
+//     );
+//   }
+// }
+// ---------------------------------------------------------------------------
 class _SvgNode extends StatelessWidget {
   const _SvgNode({required this.node});
 
   final _PathNodeData node;
 
+  static const _starSvg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fill="#ffffff" d="M29.889 12.472a2.013 2.013 0 0 0-1.6-1.366l-7.187-1.103-3.221-6.834a1.984 1.984 0 0 0-1.807-1.168c-.778 0-1.471.448-1.807 1.166l-3.222 6.837-7.187 1.103a2.016 2.016 0 0 0-1.6 1.366 2.09 2.09 0 0 0 .477 2.13l5.23 5.382-1.236 7.612c-.13.802.194 1.584.847 2.043a1.961 1.961 0 0 0 2.085.111l6.396-3.568 6.431 3.568a1.95 1.95 0 0 0 2.084-.111 2.066 2.066 0 0 0 .847-2.042l-1.236-7.612 5.23-5.382a2.09 2.09 0 0 0 .477-2.13z"/></svg>''';
+
   @override
   Widget build(BuildContext context) {
     final isTrophy = node.type == _PathNodeType.trophy;
 
-    String assetPath;
     if (isTrophy) {
-      assetPath = 'assets/nakhlah_web/icons/mystery_box_locked.svg';
+      return GestureDetector(
+        onTap: node.isLocked
+            ? null
+            : () {
+                final box = GetStorage();
+                box.write(_kLastInteractedNodeIdKey, node.apiId);
+                _showGiftBoxDialog(context, node.apiId, isCompleted: node.isCompleted);
+              },
+        child: PressableScale(
+          scale: node.isLocked ? 1 : .91,
+          child: SizedBox(
+            width: 80,
+            height: 80,
+            child: SvgPicture.asset(
+              'assets/nakhlah_web/icons/mystery_box_locked.svg',
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color borderColor, bgColor;
+    if (node.isCompleted) {
+      borderColor = const Color(0xFFC9A800);
+      bgColor = const Color(0xFFEAC931);
     } else if (node.isLocked) {
-      assetPath = 'assets/nakhlah_web/icons/Task_locked.svg';
+      borderColor = const Color(0xFF8A8F99);
+      bgColor = const Color(0xFFB4B9C2);
     } else {
-      assetPath = 'assets/nakhlah_web/icons/Task_unlocked.svg';
+      borderColor = const Color(0xFF6225E0);
+      bgColor = const Color(0xFF7C3AED);
     }
 
     return GestureDetector(
@@ -1329,20 +1395,32 @@ class _SvgNode extends StatelessWidget {
           : () {
               final box = GetStorage();
               box.write(_kLastInteractedNodeIdKey, node.apiId);
-              if (isTrophy) {
-                _showGiftBoxDialog(context, node.apiId, isCompleted: node.isCompleted);
-              } else {
-                _showLessonChooserDialog(context, node.apiId);
-              }
+              _showLessonChooserDialog(context, node.apiId);
             },
       child: PressableScale(
         scale: node.isLocked ? 1 : .91,
-        child: SizedBox(
-          width: isTrophy ? 80 : 90,
-          height: isTrophy ? 80 : 90,
-          child: SvgPicture.asset(
-            assetPath,
-            fit: BoxFit.contain,
+        child: Container(
+          width: 76,
+          height: 76,
+          decoration: BoxDecoration(
+            color: borderColor,
+            shape: BoxShape.circle,
+          ),
+          padding: const EdgeInsets.all(4),
+          child: Container(
+            decoration: BoxDecoration(
+              color: bgColor,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: node.isLocked
+                  ? const Icon(Icons.lock_rounded, color: Colors.white, size: 30)
+                  : SvgPicture.string(
+                      _starSvg,
+                      width: 42,
+                      height: 42,
+                    ),
+            ),
           ),
         ),
       ),
@@ -1359,27 +1437,14 @@ class _StartSpeechBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _BubbleTailPainter(),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: _WebColors.accent, width: 4),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x26000000),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Text(
+      painter: _BubblePainter(),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        child: Text(
           'START!',
           style: TextStyle(
             color: _WebColors.accent,
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: FontWeight.w900,
             letterSpacing: .9,
           ),
@@ -1389,22 +1454,44 @@ class _StartSpeechBubble extends StatelessWidget {
   }
 }
 
-class _BubbleTailPainter extends CustomPainter {
+class _BubblePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final border = Paint()..color = _WebColors.accent;
-    final fill = Paint()..color = Colors.white;
-    final cx = size.width / 2;
-    final borderPath = Path()
-      ..moveTo(cx - 12, size.height - 13)
-      ..quadraticBezierTo(cx, size.height + 5, cx + 12, size.height - 13)
+    final w = size.width;
+    final h = size.height;
+    final r = 20.0;
+    final borderW = 2.0;
+    final tailW = 7.0;
+    final tailH = 7.0;
+
+    // Full speech-bubble path: rounded rect + triangular tail
+    final bubble = Path()
+      ..moveTo(r, 0)
+      ..lineTo(w - r, 0)
+      ..quadraticBezierTo(w, 0, w, r)
+      ..lineTo(w, h - r)
+      ..quadraticBezierTo(w, h, w - r, h)
+      ..lineTo(w / 2 + tailW, h)
+      ..lineTo(w / 2, h + tailH)
+      ..lineTo(w / 2 - tailW, h)
+      ..lineTo(r, h)
+      ..quadraticBezierTo(0, h, 0, h - r)
+      ..lineTo(0, r)
+      ..quadraticBezierTo(0, 0, r, 0)
       ..close();
-    final fillPath = Path()
-      ..moveTo(cx - 6, size.height - 11)
-      ..quadraticBezierTo(cx, size.height - 1, cx + 6, size.height - 11)
-      ..close();
-    canvas.drawPath(borderPath, border);
-    canvas.drawPath(fillPath, fill);
+
+    // White fill
+    canvas.drawPath(bubble, Paint()..color = Colors.white);
+
+    // Purple border
+    canvas.drawPath(
+      bubble,
+      Paint()
+        ..color = _WebColors.accent
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = borderW
+        ..strokeJoin = StrokeJoin.round,
+    );
   }
 
   @override
