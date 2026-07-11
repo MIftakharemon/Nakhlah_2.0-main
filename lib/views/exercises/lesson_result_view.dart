@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../common/nakhlah_mascot.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_theme.dart';
+import '../../controllers/gamification_controller.dart';
 
 class LessonResultData {
   const LessonResultData({
@@ -118,14 +119,15 @@ class LessonResultView extends StatelessWidget {
   }
 
   Widget _buildStatsRow(LessonResultData data) {
+    final dateStock = Get.find<GamificationController>().stock.value.dateStock;
     return Row(
       children: [
         Expanded(
           child: _StatBox(
             label: 'Total Dates',
-            value: '${data.palmTreesRemaining}',
+            value: '$dateStock',
             icon: SvgPicture.asset(
-              'assets/nakhlah_design/Palm_Trees.svg',
+              'assets/nakhlah_web/icons/dates.svg',
               width: 36,
               height: 36,
             ),
@@ -136,7 +138,11 @@ class LessonResultView extends StatelessWidget {
           child: _StatBox(
             label: 'Time',
             value: data.formattedTime,
-            icon: const Icon(Icons.timer_rounded, size: 36, color: AppColors.accent),
+            icon: SvgPicture.asset(
+              'assets/nakhlah_web/icons/noto_stopwatch.svg',
+              width: 36,
+              height: 36,
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -144,7 +150,11 @@ class LessonResultView extends StatelessWidget {
           child: _StatBox(
             label: 'Accuracy',
             value: '${data.accuracyPercentage}%',
-            icon: const Icon(Icons.track_changes_rounded, size: 36, color: AppColors.accent),
+            icon: SvgPicture.asset(
+              'assets/nakhlah_web/icons/bullseye.svg',
+              width: 36,
+              height: 36,
+            ),
           ),
         ),
       ],

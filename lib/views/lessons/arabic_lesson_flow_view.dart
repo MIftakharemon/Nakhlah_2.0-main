@@ -812,7 +812,7 @@ class LessonCompleteStepWidget extends StatelessWidget {
               const Row(
                 children: [
                   Expanded(
-                    child: _StatBox(label: 'Total Dates', value: '🌴 0'),
+                    child: _StatBox(label: 'Total Dates', value: '📅 0'),
                   ),
                   SizedBox(width: 10),
                   Expanded(
