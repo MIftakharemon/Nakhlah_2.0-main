@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import '../../common/app_motion.dart';
+import '../../constants/app_colors.dart';
 import '../../controllers/app_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/theme_controller.dart';
@@ -170,7 +171,9 @@ class AppShellView extends StatelessWidget {
       middleText: 'Are you sure you want to logout?',
       textConfirm: 'Yes',
       textCancel: 'No',
+      cancelTextColor: Colors.black,
       confirmTextColor: Colors.white,
+      buttonColor: AppColors.accent,
       onConfirm: () {
         Get.back();
         Get.find<AuthController>().logout();
