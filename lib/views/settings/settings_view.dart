@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../constants/app_colors.dart';
 import '../../constants/dark_mode_colors.dart';
 import '../../controllers/app_controller.dart';
+import '../../controllers/theme_controller.dart';
 import '../../routes/app_routes.dart';
 import 'settings_detail_view.dart';
 
@@ -85,8 +87,64 @@ class _SettingsViewState extends State<SettingsView> {
             title: 'About Nakhlah',
             onTap: () => Get.toNamed(Routes.about),
           ),
+          _buildDarkModeToggle(context),
           const SizedBox(height: 32),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDarkModeToggle(BuildContext context) {
+    final themeCtrl = Get.find<ThemeController>();
+    final dc = DarkModeColors.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: themeCtrl.toggleTheme,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: dc.cardBackground,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEDE7F6),
+                  shape: BoxShape.circle,
+                ),
+                child: Obx(() => Icon(
+                  themeCtrl.isDarkMode.value
+                      ? Icons.dark_mode_rounded
+                      : Icons.light_mode_rounded,
+                  color: AppColors.accent,
+                  size: 22,
+                )),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Obx(() => Text(
+                  themeCtrl.isDarkMode.value ? 'Dark Mode' : 'Light Mode',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: dc.textPrimary,
+                  ),
+                )),
+              ),
+              Obx(() => Switch(
+                value: themeCtrl.isDarkMode.value,
+                onChanged: (_) => themeCtrl.toggleTheme(),
+                activeTrackColor: AppColors.accent.withValues(alpha: 0.4),
+                activeThumbColor: AppColors.accent,
+              )),
+            ],
+          ),
+        ),
       ),
     );
   }
