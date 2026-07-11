@@ -53,15 +53,17 @@ class _StoreViewState extends State<StoreView> with WidgetsBindingObserver {
       middleText: 'Did you complete the payment?',
       textConfirm: 'Yes',
       textCancel: 'No',
+      buttonColor: AppColors.accent,
       confirmTextColor: Colors.white,
+      cancelTextColor: Colors.black,
       onConfirm: () {
         Get.back();
         Get.snackbar(
           'Success',
           'Payment completed! Your order will be processed shortly.',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.palm,
-          colorText: Colors.white,
+          backgroundColor: AppColors.accent,
+          colorText: Colors.black,
           duration: const Duration(seconds: 3),
         );
         _loadData();
