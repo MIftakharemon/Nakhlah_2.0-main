@@ -307,12 +307,14 @@ class _ProfileViewState extends State<ProfileView> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: OutlinedButton.icon(
+          child: ElevatedButton.icon(
             onPressed: () => _showShareProfileSheet(context),
             icon: const Icon(Icons.share, size: 18),
             label: const Text('Share', overflow: TextOverflow.ellipsis),
-            style: OutlinedButton.styleFrom(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
               foregroundColor: AppColors.accent,
+              elevation: 0,
               side: const BorderSide(color: AppColors.accent, width: 1.5),
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
               shape: RoundedRectangleBorder(
@@ -372,7 +374,7 @@ class _ProfileViewState extends State<ProfileView> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 4),
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
