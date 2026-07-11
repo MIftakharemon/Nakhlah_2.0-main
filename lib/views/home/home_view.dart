@@ -195,7 +195,7 @@ class _MainContent extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(0.5, 28, 0.5, 0.1),
+          padding: EdgeInsets.fromLTRB(0.5, MediaQuery.of(context).padding.top + 4, 0.5, 0.1),
           child: Obx(() => _GlassStatsBar(
             streak: gamification.streak.value.currentStreak,
             dates: gamification.stock.value.dateStock,
