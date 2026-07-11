@@ -186,7 +186,8 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
   @override
   Widget build(BuildContext context) {
     return IntroScaffold(
-      showBack: _step > 0,
+      showBack: false,
+      showWordmark: false,
       child: Column(
         children: [
           AnimatedOpacity(
@@ -1071,7 +1072,7 @@ class _ProfileInfoStepContentState extends State<_ProfileInfoStepContent> {
                 hintText: 'Your full name',
                 hintStyle: TextStyle(color: AppColors.muted),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
+                contentPadding: EdgeInsets.symmetric(horizontal: 14),
               ),
               style: TextStyle(
                 color: AppColors.ink,
@@ -1086,15 +1087,15 @@ class _ProfileInfoStepContentState extends State<_ProfileInfoStepContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
-                  controller: _contactCtrl,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    hintText: '0XXXXXXXXXX',
-                    hintStyle: TextStyle(color: AppColors.muted),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
+              TextField(
+                controller: _contactCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: '0XXXXXXXXXX',
+                  hintStyle: TextStyle(color: AppColors.muted),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 14),
+                ),
                   style: TextStyle(
                     color: AppColors.ink,
                     fontWeight: FontWeight.w600,
@@ -1352,7 +1353,7 @@ class _AccountStepContentState extends State<_AccountStepContent> {
                   hintText: 'you@example.com',
                   hintStyle: TextStyle(color: AppColors.muted),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 14),
                 ),
                 style: TextStyle(
                   color: AppColors.ink,
@@ -1367,11 +1368,11 @@ class _AccountStepContentState extends State<_AccountStepContent> {
               child: TextField(
                 controller: _passCtrl,
                 obscureText: _obscure,
-                decoration: InputDecoration(
-                  hintText: 'Choose a secure password',
-                  hintStyle: const TextStyle(color: AppColors.muted),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
+                  decoration: InputDecoration(
+                    hintText: 'Choose a secure password',
+                    hintStyle: const TextStyle(color: AppColors.muted),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 14),
                   suffixIcon: GestureDetector(
                     onTap: () => setState(() => _obscure = !_obscure),
                     child: Icon(

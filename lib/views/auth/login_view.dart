@@ -54,18 +54,15 @@ class _LoginViewState extends State<LoginView> {
 
     return IntroScaffold(
       showBack: true,
+      showWordmark: false,
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 8, bottom: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // ── hero ───────────────────────────────────
-            const IntroHeroImage(
-              asset: IntroAssets.leafBook,
-              height: 200,
-              blobColor: AppColors.accent,
-            ),
-            const SizedBox(height: 12),
+            // ── logo ───────────────────────────────────
+            const NakhlahWordmark(compact: false),
+            const SizedBox(height: 20),
 
             // ── titles ─────────────────────────────────
             const IntroTitleBlock(
