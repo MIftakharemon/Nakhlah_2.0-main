@@ -350,8 +350,9 @@ class _ProfileViewState extends State<ProfileView> {
     final dc = DarkModeColors.of(context);
     final dca = p.profile.value?.dailyChallengeActivity;
     final stock = p.stock.value;
+    final profileStock = p.profile.value?.stock;
     final achievementsUnlocked = g.achievements.where((a) => a.achieved).length;
-    final badgesEarned = stock.badgesCount;
+    final badgesEarned = profileStock?.badgesCount ?? stock.badgesCount;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
