@@ -358,6 +358,7 @@ class UserProfileModel {
     this.currentProgress = const ProgressModel(),
     this.stock = const GamificationStock(),
     this.dailyChallengeActivity = const DailyChallengeActivity(),
+    this.openedGiftBoxes = const [],
   });
 
   final String? id, fullName, contactNumber, email;
@@ -366,10 +367,22 @@ class UserProfileModel {
   final ProgressModel currentProgress;
   final GamificationStock stock;
   final DailyChallengeActivity dailyChallengeActivity;
+  final List<String> openedGiftBoxes;
+
+  bool hasOpenedGiftBox(String taskId) {
+    return openedGiftBoxes.contains(taskId);
+  }
 
   factory UserProfileModel.fromJson(dynamic value) {
     final j = _map(_unwrap(value));
     if (j == null) return const UserProfileModel();
+    final openedRaw = j['openedGiftBoxes'];
+    final openedGiftBoxes = openedRaw is List
+        ? openedRaw.map((e) {
+            if (e is Map) return '${e['taskId'] ?? ''}';
+            return '$e';
+          }).where((s) => s.isNotEmpty).toList()
+        : <String>[];
     return UserProfileModel(
       id: j['id']?.toString(),
       fullName: j['fullName']?.toString(),
@@ -386,6 +399,7 @@ class UserProfileModel {
       dailyChallengeActivity: DailyChallengeActivity.fromJson(
         j['dailyChallengeActivity'],
       ),
+      openedGiftBoxes: openedGiftBoxes,
     );
   }
 }

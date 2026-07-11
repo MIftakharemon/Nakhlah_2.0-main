@@ -1327,10 +1327,13 @@ class _SvgNode extends StatelessWidget {
       onTap: node.isLocked
           ? null
           : () {
-              // Save lastInteractedNodeId (matches web localStorage behavior)
               final box = GetStorage();
               box.write(_kLastInteractedNodeIdKey, node.apiId);
-              _showLessonChooserDialog(context, node.apiId);
+              if (isTrophy) {
+                _showGiftBoxDialog(context, node.apiId, isCompleted: node.isCompleted);
+              } else {
+                _showLessonChooserDialog(context, node.apiId);
+              }
             },
       child: PressableScale(
         scale: node.isLocked ? 1 : .91,
@@ -1506,6 +1509,375 @@ class _GlassCard extends StatelessWidget {
           ),
           child: child,
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Gift Box Dialog
+// ---------------------------------------------------------------------------
+void _showGiftBoxDialog(BuildContext context, String taskId, {bool isCompleted = false}) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierColor: Colors.black54,
+    builder: (ctx) => _GiftBoxDialog(taskId: taskId, isCompleted: isCompleted),
+  );
+}
+
+class _GiftBoxDialog extends StatefulWidget {
+  const _GiftBoxDialog({required this.taskId, this.isCompleted = false});
+  final String taskId;
+  final bool isCompleted;
+
+  @override
+  State<_GiftBoxDialog> createState() => _GiftBoxDialogState();
+}
+
+class _GiftBoxDialogState extends State<_GiftBoxDialog>
+    with SingleTickerProviderStateMixin {
+  bool _isClaiming = false;
+  bool _hasClaimed = false;
+  bool _isGiftAlreadyOpened = false;
+  String? _loadError;
+
+  int _datesReceived = 0;
+  int _injazReceived = 0;
+  List<String> _badgesAdded = [];
+
+  late AnimationController _bounceController;
+  late Animation<double> _bounceAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _isGiftAlreadyOpened = widget.isCompleted;
+    _hasClaimed = widget.isCompleted;
+
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    _bounceAnimation = Tween<double>(begin: 0, end: -10).animate(
+      CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
+    );
+    _bounceController.repeat(reverse: true);
+
+    _checkGiftStatus();
+  }
+
+  @override
+  void dispose() {
+    _bounceController.dispose();
+    super.dispose();
+  }
+
+  void _checkGiftStatus() {
+    try {
+      final profile = Get.find<ProfileController>().profile.value;
+      if (profile != null && profile.hasOpenedGiftBox(widget.taskId)) {
+        setState(() {
+          _isGiftAlreadyOpened = true;
+          _hasClaimed = true;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _claimGift() async {
+    if (_isClaiming || _hasClaimed || _isGiftAlreadyOpened) return;
+
+    setState(() {
+      _isClaiming = true;
+      _hasClaimed = true;
+    });
+
+    try {
+      final content = Get.find<ContentController>();
+      final result = await content.service.giftBox(widget.taskId);
+
+      if (result == null) throw Exception('Failed to claim gift box');
+
+      final data = result is Map ? result : <String, dynamic>{};
+      setState(() {
+        _datesReceived = _parseReward(data, ['datesReceived', 'dateReceived']);
+        _injazReceived = _parseReward(data, ['injazReceived', 'InjazReceived']);
+        final badges = data['badges'];
+        if (badges is Map && badges['added'] is List) {
+          _badgesAdded = (badges['added'] as List).map((e) => '$e').toList();
+        }
+      });
+
+      // Make learner progress for first lesson in this task
+      try {
+        final lessons = await content.service.lessonsByTask(widget.taskId);
+        if (lessons.isNotEmpty) {
+          await content.service.makeLearnerProgress(lessons.first.id);
+        }
+      } catch (_) {}
+
+      // Refresh profile
+      await Get.find<ProfileController>().load();
+
+      // Auto close after 2.5 seconds
+      Future.delayed(const Duration(milliseconds: 2500), () {
+        if (mounted) Navigator.of(context).pop();
+      });
+    } catch (e) {
+      final msg = e.toString();
+      if (msg.toLowerCase().contains('gift box already opened')) {
+        setState(() {
+          _isGiftAlreadyOpened = true;
+          _hasClaimed = true;
+          _loadError = null;
+        });
+      } else {
+        setState(() {
+          _loadError = 'Failed to claim gift. Please try again.';
+          _hasClaimed = false;
+        });
+      }
+    } finally {
+      setState(() => _isClaiming = false);
+    }
+  }
+
+  int _parseReward(Map data, List<String> keys) {
+    for (final key in keys) {
+      final v = data[key];
+      if (v is int) return v;
+      if (v is String) return int.tryParse(v) ?? 0;
+      if (v is num) return v.toInt();
+    }
+    return 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String title;
+    if (_isGiftAlreadyOpened) {
+      title = 'Gift Already Claimed';
+    } else if (_hasClaimed) {
+      title = 'Gift Claimed!';
+    } else {
+      title = 'Mystery Gift Box';
+    }
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.3), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF7D49DF), Color(0xFF5B2CB0)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  Positioned(
+                    right: 12,
+                    top: 0,
+                    bottom: 0,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white70,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Content
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Error banner
+                  if (_loadError != null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEE2E2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        _loadError!,
+                        style: const TextStyle(
+                          color: Color(0xFFDC2626),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                  // Treasure Chest
+                  GestureDetector(
+                    onTap: _claimGift,
+                    child: AnimatedBuilder(
+                      animation: _bounceAnimation,
+                      builder: (context, child) {
+                        final showBounce = !_hasClaimed && !_isGiftAlreadyOpened;
+                        return Transform.translate(
+                          offset: Offset(0, showBounce ? _bounceAnimation.value : 0),
+                          child: child,
+                        );
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 400),
+                        width: 160,
+                        height: 160,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _isGiftAlreadyOpened
+                              ? const Color(0xFFE5E7EB)
+                              : _hasClaimed
+                                  ? const Color(0xFFFEF3C7)
+                                  : const Color(0xFFF3E8FF),
+                          boxShadow: _hasClaimed && !_isGiftAlreadyOpened
+                              ? [
+                                  BoxShadow(
+                                    color: const Color(0xFFFBBF24).withValues(alpha: 0.4),
+                                    blurRadius: 30,
+                                    spreadRadius: 5,
+                                  ),
+                                ]
+                              : [],
+                        ),
+                        child: Center(
+                          child: NakhlahTreasureChestIcon(
+                            size: _hasClaimed && !_isGiftAlreadyOpened ? 120 : 100,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Title text
+                  Text(
+                    _isGiftAlreadyOpened
+                        ? 'Already opened!'
+                        : _hasClaimed
+                            ? 'Awesome!'
+                            : 'You found a gift!',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1F2937),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _isGiftAlreadyOpened
+                        ? 'You already collected this gift earlier.'
+                        : _hasClaimed
+                            ? 'Your rewards have been added to your account.'
+                            : 'Tap the chest to claim your rewards.',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  // Rewards display
+                  if (_hasClaimed && !_isGiftAlreadyOpened &&
+                      (_injazReceived > 0 || _datesReceived > 0 || _badgesAdded.isNotEmpty))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_injazReceived > 0)
+                            _RewardItem(
+                              text: '+$_injazReceived Injaz',
+                              color: const Color(0xFFF59E0B),
+                            ),
+                          if (_datesReceived > 0)
+                            _RewardItem(
+                              text: '+$_datesReceived Dates',
+                              color: const Color(0xFF0EA5E9),
+                            ),
+                          if (_badgesAdded.isNotEmpty)
+                            _RewardItem(
+                              text: '+${_badgesAdded.length} Badge${_badgesAdded.length > 1 ? 's' : ''} Earned',
+                              color: const Color(0xFF10B981),
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RewardItem extends StatelessWidget {
+  const _RewardItem({required this.text, required this.color});
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w900,
+          color: color,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
