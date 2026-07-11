@@ -916,7 +916,7 @@ class _ProfileViewState extends State<ProfileView> {
                     color: dc.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   achievement.achievementTitle,
                   style: TextStyle(fontSize: 13, color: dc.textSecondary),
