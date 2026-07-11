@@ -934,16 +934,9 @@ class _GlassStatsBar extends StatelessWidget {
                   final active = i < currentPalms;
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: SvgPicture.asset(
-                      'assets/nakhlah_design/Palm_Trees.svg',
-                      width: 28,
-                      height: 28,
-                      colorFilter: ColorFilter.mode(
-                        active
-                            ? const Color(0xFF7D49DF)
-                            : const Color(0xFFD0D0D0),
-                        BlendMode.srcIn,
-                      ),
+                    child: Opacity(
+                      opacity: active ? 1.0 : 0.3,
+                      child: const PalmTreeIcon(size: 28),
                     ),
                   );
                 }),
