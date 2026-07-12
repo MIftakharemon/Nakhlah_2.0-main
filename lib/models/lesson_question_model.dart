@@ -119,12 +119,6 @@ class LessonQuestion {
 
   String get cleanLearnAnswer {
     var text = learnAnswer;
-    final arabicMatch = RegExp(r'\{([^}]*)\}').firstMatch(text);
-    if (arabicMatch != null) {
-      text = arabicMatch.group(1) ?? text;
-    }
-    text = text.replaceAll(RegExp(r'[\{\}]'), '').trim();
-    text = text.replaceAll(RegExp(r'[A-Za-z0-9(),.!?;:/\-]'), '').trim();
     text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
     return text;
   }
@@ -146,7 +140,7 @@ class LessonQuestion {
       answers: _list(j['answers'])
           .map((e) => LessonAnswer.fromJson(e))
           .toList(),
-      learnAnswer: _string(j['learn_answer'] ?? j['learnAnswer']),
+      learnAnswer: _extractLearnAnswer(j['learn_answer'] ?? j['learnAnswer']),
       trueFalseAnswer: j['true_false_answer'] is bool
           ? j['true_false_answer'] as bool
           : (j['trueFalseAnswer'] is bool
@@ -179,6 +173,30 @@ int _int(dynamic value, [int fallback = 0]) {
 String _string(dynamic value, [String fallback = '']) {
   final text = value?.toString();
   return text == null || text == 'null' ? fallback : text;
+}
+
+bool _looksArabic(dynamic value) {
+  final text = value?.toString() ?? '';
+  return RegExp(r'[\u0600-\u06FF]').hasMatch(text);
+}
+
+String _extractLearnAnswer(dynamic value) {
+  if (value == null) return '';
+
+  if (value is String) {
+    return _looksArabic(value) ? value : '';
+  }
+
+  if (value is Map) {
+    for (final entry in value.entries) {
+      final val = entry.value;
+      if (val is String && _looksArabic(val)) return val;
+      final key = entry.key?.toString() ?? '';
+      if (_looksArabic(key)) return key;
+    }
+  }
+
+  return _string(value);
 }
 
 List<dynamic> _unwrapList(dynamic value) {
