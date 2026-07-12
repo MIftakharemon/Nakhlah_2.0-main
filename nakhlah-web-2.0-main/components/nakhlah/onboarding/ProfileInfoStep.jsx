@@ -95,7 +95,7 @@ export function ProfileInfoStep({
       >
         <div className="bg-card border border-border p-4 rounded-2xl">
           <label className="block text-sm text-muted-foreground mb-1">
-            Full name
+            Full name (optional)
           </label>
           <Input
             value={localName}
@@ -107,7 +107,7 @@ export function ProfileInfoStep({
 
         <div className="bg-card border border-border p-4 rounded-2xl">
           <label className="block text-sm text-muted-foreground mb-1">
-            Contact number
+            Contact number (optional)
           </label>
           <Input
             value={localContact}

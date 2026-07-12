@@ -73,10 +73,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       case 5:
         return _interestIds.isNotEmpty;
       case 6:
-        final digits = _contactNumber.replaceAll(RegExp(r'[^0-9]'), '');
-        return _fullName.trim().length > 1 &&
-            _contactNumber.trim().length > 1 &&
-            digits.length <= 11;
+        return true;
       case 7:
         return _ageId.isNotEmpty;
       case 8:
@@ -249,6 +246,31 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       padding: const EdgeInsets.only(top: 8),
       child: Obx(() {
         final loading = _profileCtrl.loading.value;
+        if (_step == 6) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IntroPrimaryButton(
+                label: 'Continue',
+                icon: Icons.arrow_forward_rounded,
+                loading: loading,
+                onPressed: _canProceed ? () => _next() : null,
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => _next(),
+                child: Text(
+                  'Skip for now',
+                  style: TextStyle(
+                    color: AppColors.muted,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
         return IntroPrimaryButton(
           label: 'Continue',
           icon: Icons.arrow_forward_rounded,
@@ -1063,7 +1085,7 @@ class _ProfileInfoStepContentState extends State<_ProfileInfoStepContent> {
           const SizedBox(height: 24),
           // Full Name Card
           _buildFieldCard(
-            label: 'Full name',
+            label: 'Full name (optional)',
             child: TextField(
               controller: _nameCtrl,
               decoration: InputDecoration(
@@ -1081,7 +1103,7 @@ class _ProfileInfoStepContentState extends State<_ProfileInfoStepContent> {
           const SizedBox(height: 12),
           // Contact Number Card
           _buildFieldCard(
-            label: 'Contact number',
+            label: 'Contact number (optional)',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

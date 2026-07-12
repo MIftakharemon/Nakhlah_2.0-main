@@ -353,13 +353,7 @@ export default function Onboarding() {
       case 6:
         return interests.length > 0;
       case 7:
-        return (
-          fullName.trim().length > 1 &&
-          contactNumber.trim().startsWith("0") &&
-          contactNumber.trim().length > 1 &&
-          !profileFileError &&
-          !profileContactError
-        );
+        return true;
       case 8:
         return age !== "";
       case 9:
@@ -699,19 +693,29 @@ export default function Onboarding() {
           </Button>
 
           {currentStep < steps.length ? (
-            <Button
-              onClick={handleNext}
-              disabled={
-                isLoadingOnboarding ||
-                !!loadingError ||
-                !canProceed() ||
-                isRegistering
-              }
-              className="gap-2 bg-gradient-to-r from-violet-500 to-indigo-500 text-white"
-            >
-              {isRegistering ? "Creating Account..." : "Continue"}
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col items-end gap-2">
+              <Button
+                onClick={handleNext}
+                disabled={
+                  isLoadingOnboarding ||
+                  !!loadingError ||
+                  !canProceed() ||
+                  isRegistering
+                }
+                className="gap-2 bg-gradient-to-r from-violet-500 to-indigo-500 text-white"
+              >
+                {isRegistering ? "Creating Account..." : "Continue"}
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+              {currentStep === 7 && (
+                <button
+                  onClick={handleNext}
+                  className="text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+                >
+                  Skip for now
+                </button>
+              )}
+            </div>
           ) : (
             <Button
               onClick={handleComplete}
