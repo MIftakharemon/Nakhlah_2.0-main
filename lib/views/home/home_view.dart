@@ -289,7 +289,6 @@ class _LearnDashboardState extends State<_LearnDashboard> {
   @override
   void didUpdateWidget(covariant _LearnDashboard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Re-scroll when profile data just arrived
     if (!_hasScrolledToResume) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _scrollToResumePosition();
@@ -306,7 +305,6 @@ class _LearnDashboardState extends State<_LearnDashboard> {
   void _scrollToResumePosition() {
     if (_hasScrolledToResume) return;
     if (widget.levels.isEmpty) return;
-    // Don't scroll until profile data is available
     if (widget.profile.profile.value == null) return;
 
     final flat = _buildJourneyView(
@@ -342,36 +340,24 @@ class _LearnDashboardState extends State<_LearnDashboard> {
     if (targetId == null) return;
 
     _hasScrolledToResume = true;
-    _scrollToNodeId(targetId, retries: 5);
-  }
 
-  void _scrollToNodeId(String nodeId, {int retries = 5}) {
-    final key = _nodeKeys[nodeId];
-    if (key == null) {
-      if (retries > 1) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (mounted) _scrollToNodeId(nodeId, retries: retries - 1);
-        });
-      }
-      return;
+    void attemptScroll() {
+      if (!mounted) return;
+      final key = _nodeKeys[targetId!];
+      if (key == null) return;
+      final ctx = key.currentContext;
+      if (ctx == null) return;
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        alignment: 0.5,
+      );
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final nodeContext = key.currentContext;
-      if (nodeContext != null) {
-        Scrollable.ensureVisible(
-          nodeContext,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-          alignment: 0.5,
-        );
-      } else if (retries > 1) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (mounted) _scrollToNodeId(nodeId, retries: retries - 1);
-        });
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => attemptScroll());
+    Future.delayed(const Duration(milliseconds: 400), () => attemptScroll());
+    Future.delayed(const Duration(milliseconds: 900), () => attemptScroll());
   }
 
   @override
