@@ -866,6 +866,7 @@ class _ExerciseViewState extends State<ExerciseView>
     }
   }
 
+
   // ─── LEARN ──────────────────────────────────────────────────────────────
   Widget _buildLearnQuestion(LessonQuestion q) {
     return Padding(
