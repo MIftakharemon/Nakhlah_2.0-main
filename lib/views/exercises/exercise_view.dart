@@ -940,7 +940,7 @@ class _ExerciseViewState extends State<ExerciseView>
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Center(child: _buildQuestionLabel('Question')),
           const SizedBox(height: 8),
