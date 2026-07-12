@@ -64,8 +64,6 @@ String _buildDiacritizedPreview(String targetWord, String selectedWord) {
   final targetBase = _stripArabicDiacritics(targetWord).replaceAll(RegExp(r'\s+'), '');
   final selectedBase = _stripArabicDiacritics(selectedWord).replaceAll(RegExp(r'\s+'), '');
 
-  if (!targetBase.startsWith(selectedBase)) return selectedWord;
-
   int consumedBaseChars = 0;
   final preview = StringBuffer();
   final selectedBaseLength = selectedBase.length;
@@ -512,7 +510,7 @@ class _ExerciseViewState extends State<ExerciseView>
       _audioPlayer.setSpeed(speed);
       await _audioPlayer.play();
     } catch (e) {
-      AppSnackbar.error('Could not play audio.');
+      if (mounted) AppSnackbar.error('Could not play audio.');
     } finally {
       if (mounted) setState(() => _audioLoading = false);
     }
@@ -1814,6 +1812,13 @@ class _ExerciseViewState extends State<ExerciseView>
       correct != null ? 'Correct answer: ${correct.title}' : 'Incorrect';
     } else if (q.isTrueFalse) {
       feedbackText = q.trueFalseAnswer == true ? 'True' : 'False';
+    } else if (q.isWordMaking || q.isSentenceMaking) {
+      final correctTitle = q.cleanLearnAnswer.isNotEmpty
+          ? q.cleanLearnAnswer
+          : q.sortedAnswers.map((a) => a.title).join('');
+      feedbackText = correctTitle.isNotEmpty
+          ? 'Correct answer: $correctTitle'
+          : 'Incorrect';
     } else {
       feedbackText = 'Incorrect';
     }
