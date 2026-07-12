@@ -502,7 +502,6 @@ class _ExerciseViewState extends State<ExerciseView>
   }
 
   Future<void> _playAudio(String url, {double speed = 1.0}) async {
-    if (_audioLoading) return;
     setState(() => _audioLoading = true);
     try {
       await _audioPlayer.stop();
