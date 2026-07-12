@@ -20,82 +20,84 @@ class GetStartedView extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 430),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                children: [
-                  const Spacer(flex: 2),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 40),
 
-                  // Speech bubble
-                  PageEnter(
-                    delay: const Duration(milliseconds: 200),
-                    child: _SpeechBubble(text: "Hi there! I'm Fatima!"),
-                  ),
-                  const SizedBox(height: 16),
+                    // Speech bubble
+                    PageEnter(
+                      delay: const Duration(milliseconds: 200),
+                      child: _SpeechBubble(text: "Hi there! I'm Fatima!"),
+                    ),
+                    const SizedBox(height: 16),
 
-                  // Mascot — matches web SVG
-                  const PageEnter(
-                    delay: Duration(milliseconds: 300),
-                    child: NakhlahMascot(size: 220),
-                  ),
+                    // Mascot — matches web SVG
+                    const PageEnter(
+                      delay: Duration(milliseconds: 300),
+                      child: NakhlahMascot(size: 220),
+                    ),
 
-                  const Spacer(flex: 2),
+                    const SizedBox(height: 40),
 
-                  // App name — "Nakhlah" text in purple (matches web)
-                  PageEnter(
-                    delay: const Duration(milliseconds: 400),
-                    child: Text(
-                      'Nakhlah',
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.accent,
-                        letterSpacing: -1,
+                    // App name — "Nakhlah" text in purple (matches web)
+                    PageEnter(
+                      delay: const Duration(milliseconds: 400),
+                      child: Text(
+                        'Nakhlah',
+                        style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.accent,
+                          letterSpacing: -1,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  // Tagline
-                  const PageEnter(
-                    delay: Duration(milliseconds: 500),
-                    child: Text(
-                      "Learn Arabic whenever and wherever\nyou want. It's free and forever.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                        height: 1.5,
+                    // Tagline
+                    const PageEnter(
+                      delay: Duration(milliseconds: 500),
+                      child: Text(
+                        "Learn Arabic whenever and wherever\nyou want. It's free and forever.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 17,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                          height: 1.5,
+                        ),
                       ),
                     ),
-                  ),
 
-                  const Spacer(flex: 3),
+                    const SizedBox(height: 40),
 
-                  // GET STARTED button
-                  PageEnter(
-                    delay: const Duration(milliseconds: 600),
-                    child: _BigButton(
-                      label: 'GET STARTED',
-                      filled: true,
-                      onTap: () async {
-                        await Get.find<StorageService>().setOnboarded(true);
-                        Get.offAllNamed(Routes.onboardingForm);
-                      },
+                    // GET STARTED button
+                    PageEnter(
+                      delay: const Duration(milliseconds: 600),
+                      child: _BigButton(
+                        label: 'GET STARTED',
+                        filled: true,
+                        onTap: () async {
+                          await Get.find<StorageService>().setOnboarded(true);
+                          Get.offAllNamed(Routes.onboardingForm);
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
+                    const SizedBox(height: 14),
 
-                  // I ALREADY HAVE AN ACCOUNT
-                  PageEnter(
-                    delay: const Duration(milliseconds: 700),
-                    child: _BigButton(
-                      label: 'I ALREADY HAVE AN ACCOUNT',
-                      filled: false,
-                      onTap: () => Get.offAllNamed(Routes.login),
+                    // I ALREADY HAVE AN ACCOUNT
+                    PageEnter(
+                      delay: const Duration(milliseconds: 700),
+                      child: _BigButton(
+                        label: 'I ALREADY HAVE AN ACCOUNT',
+                        filled: false,
+                        onTap: () => Get.offAllNamed(Routes.login),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                ],
+                    const SizedBox(height: 32),
+                  ],
+                ),
               ),
             ),
           ),

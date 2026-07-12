@@ -1392,7 +1392,7 @@ class _AccountStepContentState extends State<_AccountStepContent> {
                     hintText: 'Choose a secure password',
                     hintStyle: const TextStyle(color: AppColors.muted),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 14),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   suffixIcon: GestureDetector(
                     onTap: () => setState(() => _obscure = !_obscure),
                     child: Icon(
