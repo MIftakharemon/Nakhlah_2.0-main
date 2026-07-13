@@ -8,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../common/app_motion.dart';
 import '../../common/empty_state.dart';
+import '../../common/fresh_date_mascot.dart';
 import '../../common/loading_state.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
@@ -415,48 +416,6 @@ class _LearnDashboardState extends State<_LearnDashboard> {
     );
   }
 
-  LinearGradient _buildGradient(double progress) {
-    // Desert (orange/gold) → Amber → Teal → Midnight blue
-    // Matches web: [0, 0.3, 0.6, 1] stops
-    if (progress < 0.3) {
-      final t = progress / 0.3;
-      return LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          _lerpColor(const Color(0xFFFF8C42), const Color(0xFFE8853E), t),
-          _lerpColor(const Color(0xFFF5A623), const Color(0xFFD47835), t),
-          _lerpColor(const Color(0xFFE8853E), const Color(0xFFB85C2B), t),
-        ],
-      );
-    } else if (progress < 0.6) {
-      final t = (progress - 0.3) / 0.3;
-      return LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          _lerpColor(const Color(0xFFE8853E), const Color(0xFF4A90A4), t),
-          _lerpColor(const Color(0xFFD47835), const Color(0xFF2D5A6B), t),
-          _lerpColor(const Color(0xFFB85C2B), const Color(0xFF1A3A4A), t),
-        ],
-      );
-    } else {
-      final t = ((progress - 0.6) / 0.4).clamp(0.0, 1.0);
-      return LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          _lerpColor(const Color(0xFF4A90A4), const Color(0xFF1A3A4A), t),
-          _lerpColor(const Color(0xFF2D5A6B), const Color(0xFF0D2832), t),
-          _lerpColor(const Color(0xFF1A3A4A), const Color(0xFF051A20), t),
-        ],
-      );
-    }
-  }
-
-  Color _lerpColor(Color a, Color b, double t) {
-    return Color.lerp(a, b, t)!;
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -993,7 +952,6 @@ class _HeaderIconValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dc = DarkModeColors.of(context);
     return PressableScale(
       scale: .94,
       child: GestureDetector(
@@ -1083,6 +1041,7 @@ class _ZigzagPath extends StatelessWidget {
             nodes: groupedNodes[displaySections[sectionIndex].id] ?? [],
             allNodes: nodes,
             sectionIndex: sectionIndex,
+            totalSections: displaySections.length,
             nodeKeys: nodeKeys,
           ),
       ],
@@ -1112,6 +1071,7 @@ class _SectionPath extends StatelessWidget {
     required this.nodes,
     required this.allNodes,
     required this.sectionIndex,
+    required this.totalSections,
     required this.nodeKeys,
   });
 
@@ -1119,9 +1079,12 @@ class _SectionPath extends StatelessWidget {
   final List<_PathNodeData> nodes;
   final List<_PathNodeData> allNodes;
   final int sectionIndex;
+  final int totalSections;
   final Map<String, GlobalKey> nodeKeys;
 
   static const _lessonRowHeight = 112.0;
+  static const _mascotVerticalOffset = -150.0;
+  static const _pathFrequency = 0.8;
 
   @override
   Widget build(BuildContext context) {
@@ -1135,9 +1098,49 @@ class _SectionPath extends StatelessWidget {
     final displayNodes = nodes.toList()
       ..sort((a, b) => b.taskOrder.compareTo(a.taskOrder));
 
+    // Find gift box (trophy) node in this section for mascot positioning
+    int? giftBoxLocalIndex;
+    int? giftBoxGlobalIndex;
+    for (var i = 0; i < displayNodes.length; i++) {
+      if (displayNodes[i].type == _PathNodeType.trophy) {
+        giftBoxLocalIndex = i;
+        giftBoxGlobalIndex = allNodes.indexWhere((n) => n.id == displayNodes[i].id);
+        break;
+      }
+    }
+
+    // Mascot positioning — matches web ZigzagPath exactly:
+    // 1. Compute midpoint using global lesson count (allNodes.length)
+    // 2. Find which midpoints anchor to this section
+    // 3. Position = (midpoint - sectionStartGlobalIndex) * ROW + ROW/2 + OFFSET
+    final totalLessons = allNodes.length;
+    final halfWave = math.pi / _pathFrequency;
+    final firstTurningPoint = math.pi / (2 * _pathFrequency);
+    final sectionStartGlobalIndex = allNodes.indexWhere(
+      (n) => n.sectionId == section.id,
+    );
+
+    double? mascotMidpoint;
+    bool mascotOnLeft = false;
+    int slotIndex = 0;
+
+    for (
+      var tp = firstTurningPoint;
+      tp + halfWave <= totalLessons;
+      tp += halfWave, slotIndex++
+    ) {
+      final midpoint = tp + halfWave / 2;
+      final anchorIdx = midpoint.floor().clamp(0, totalLessons - 1);
+      final anchorNode = allNodes[anchorIdx];
+      if (anchorNode.sectionId != section.id) continue;
+
+      mascotMidpoint = midpoint;
+      final sinVal = math.sin(midpoint * _pathFrequency);
+      mascotOnLeft = sinVal > 0;
+    }
+
     return Column(
       children: [
-        // Reversed lessons: highest taskOrder at top, task 1 near bottom
         LayoutBuilder(
           builder: (context, constraints) {
             return Stack(
@@ -1166,6 +1169,40 @@ class _SectionPath extends StatelessWidget {
                       ),
                   ],
                 ),
+                // Mascot — absolute positioned within section, like web
+                // Web: left=MASCOT_SIDE_POSITIONS, top=(midpoint-levelStart)*ROW+ROW/2+OFFSET,
+                //       transform="translate(-50%, -50%)"
+                if (mascotMidpoint != null)
+                  Positioned(
+                    top: (sectionIndex == 0 && giftBoxLocalIndex != null
+                            ? giftBoxLocalIndex.toDouble()
+                            : mascotMidpoint - sectionStartGlobalIndex) *
+                            _lessonRowHeight +
+                        _lessonRowHeight / 2 +
+                        _mascotVerticalOffset -
+                        65,
+                    left: (() {
+                      if (section.unitOrder == 6 || section.unitOrder == 7) return 0.85;
+                      if (sectionIndex == 2 || sectionIndex == 6) return 0.85;
+                      if (sectionIndex == 7) return 0.20;
+                      if (sectionIndex == totalSections - 10) return 0.20;
+                      if (sectionIndex == totalSections - 11 || sectionIndex == totalSections - 14) return 0.78;
+                      if (section.levelOrder == 5 && section.unitOrder == 17) return 0.20;
+                      // Section 0: place mascot next to gift box (opposite side)
+                      if (sectionIndex == 0 && giftBoxGlobalIndex != null) {
+                        final giftBoxOnRight = math.sin(giftBoxGlobalIndex * _pathFrequency) > 0;
+                        return giftBoxOnRight ? 0.22 : 0.78;
+                      }
+                      return mascotOnLeft ? 0.22 : 0.78;
+                    })() *
+                            constraints.maxWidth -
+                        50,
+                    child: const FreshDateMascot(
+                      size: 100,
+                      mood: FreshDateMood.happy,
+                      animate: true,
+                    ),
+                  ),
               ],
             );
           },
@@ -1270,7 +1307,6 @@ class _LessonNodePosition extends StatelessWidget {
           height: 112,
           child: Stack(
             clipBehavior: Clip.none,
-            alignment: Alignment.center,
             children: [
               Positioned(top: 16, left: 0, child: _SvgNode(node: node)),
               if (node.isCurrent)
@@ -1995,7 +2031,7 @@ void _showLessonChooserDialog(BuildContext context, String taskId) {
                 ? 'ALL CONTENT IS AVAILABLE TO PRACTICE'
                 : 'SELECT AN AVAILABLE BLOCK TO BEGIN';
 
-            return Column(
+    return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
@@ -2574,14 +2610,8 @@ class _WebColors {
   static const primaryForeground = Color(0xFF47331F);
   // --accent: 263 70% 58% = #7D49DF
   static const accent = Color(0xFF7D49DF);
-  // --foreground: 30 25% 15% = #30261D
-  static const foreground = Color(0xFF30261D);
-  // --card: 40 40% 98% = #FCFAF6
-  static const card = Color(0xFFFCFAF6);
   // --muted: 40 20% 90% = #EAE5DB
   static const muted = Color(0xFFEAE5DB);
-  // --muted-foreground: 30 15% 45% = #846F61
-  static const mutedForeground = Color(0xFF846F61);
   // --border: 40 25% 85% = #E2D8C9
   static const border = Color(0xFFE2D8C9);
 }
