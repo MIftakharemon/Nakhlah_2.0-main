@@ -3,6 +3,27 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+enum MascotType {
+  celebrating,
+  focused,
+  encouraging,
+  happy,
+  thinking,
+  excited,
+  proud,
+  cool,
+  confident,
+  sad,
+  sleeping,
+  surprised,
+  defaultMascot;
+
+  String get assetPath {
+    if (this == MascotType.defaultMascot) return 'assets/nakhlah_web/mascot.svg';
+    return 'assets/$name.svg';
+  }
+}
+
 /// Nakhlah water-drop mascot rendered from the web SVG asset.
 ///
 /// Animates with the same floating keyframes as the web CSS:
@@ -14,6 +35,7 @@ class NakhlahMascot extends StatefulWidget {
     super.key,
     this.size = 128,
     this.animate = true,
+    this.mascotType = MascotType.defaultMascot,
   });
 
   /// Width & height of the mascot (square).
@@ -21,6 +43,9 @@ class NakhlahMascot extends StatefulWidget {
 
   /// Whether the float animation plays.
   final bool animate;
+
+  /// Which mascot SVG to show.
+  final MascotType mascotType;
 
   @override
   State<NakhlahMascot> createState() => _NakhlahMascotState();
@@ -92,7 +117,7 @@ class _NakhlahMascotState extends State<NakhlahMascot>
   @override
   Widget build(BuildContext context) {
     final mascot = SvgPicture.asset(
-      'assets/nakhlah_web/mascot.svg',
+      widget.mascotType.assetPath,
       width: widget.size,
       height: widget.size * 1.3, // viewBox is 80×104 → aspect ≈ 1.3
       fit: BoxFit.contain,

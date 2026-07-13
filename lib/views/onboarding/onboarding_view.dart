@@ -123,7 +123,7 @@ class _LandingPage extends StatelessWidget {
             const SizedBox(height: 12),
 
             // ── Mascot — matches web SVG ─────────────────────────
-            const NakhlahMascot(size: 220),
+            const NakhlahMascot(size: 220, mascotType: MascotType.celebrating),
 
             const Spacer(flex: 2),
 

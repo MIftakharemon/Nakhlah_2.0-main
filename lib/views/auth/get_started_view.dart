@@ -35,7 +35,7 @@ class GetStartedView extends StatelessWidget {
                     // Mascot — matches web SVG
                     const PageEnter(
                       delay: Duration(milliseconds: 300),
-                      child: NakhlahMascot(size: 220),
+                      child: NakhlahMascot(size: 220, mascotType: MascotType.celebrating),
                     ),
 
                     const SizedBox(height: 40),

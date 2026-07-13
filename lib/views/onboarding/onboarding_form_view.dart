@@ -298,6 +298,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       items: items,
       selectedId: _strengthId,
       onSelect: (id) => setState(() => _strengthId = id),
+      mascotType: MascotType.focused,
     );
   }
 
@@ -312,6 +313,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       items: opts.goal,
       selectedGoalTime: _goalTime,
       onSelect: (v) => setState(() => _goalTime = v),
+      mascotType: MascotType.encouraging,
     );
   }
 
@@ -326,6 +328,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       items: opts.purpose,
       selectedId: _purposeId,
       onSelect: (id) => setState(() => _purposeId = id),
+      mascotType: MascotType.encouraging,
     );
   }
 
@@ -340,6 +343,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       items: opts.country,
       selectedId: _countryId,
       onSelect: (id) => setState(() => _countryId = id),
+      mascotType: MascotType.happy,
     );
   }
 
@@ -354,6 +358,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       items: opts.userSource,
       selectedId: _sourceId,
       onSelect: (id) => setState(() => _sourceId = id),
+      mascotType: MascotType.thinking,
     );
   }
 
@@ -376,6 +381,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
           }
         });
       },
+      mascotType: MascotType.excited,
     );
   }
 
@@ -402,6 +408,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
       selectedId: _ageId,
       onSelect: (id) => setState(() => _ageId = id),
       hideImages: true,
+      mascotType: MascotType.happy,
     );
   }
 
@@ -461,7 +468,7 @@ class _OnboardingFormViewState extends State<OnboardingFormView> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const NakhlahMascot(size: 160),
+              const NakhlahMascot(size: 160, mascotType: MascotType.celebrating),
               const SizedBox(height: 28),
               const Text(
                 'You\'re ready',
@@ -522,17 +529,19 @@ class _MascotTitleHeader extends StatelessWidget {
   const _MascotTitleHeader({
     required this.title,
     required this.subtitle,
+    this.mascotType = MascotType.defaultMascot,
   });
 
   final String title;
   final String subtitle;
+  final MascotType mascotType;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const NakhlahMascot(size: 100),
+        NakhlahMascot(size: 100, mascotType: mascotType),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
@@ -615,6 +624,7 @@ class _SelectionStep extends StatelessWidget {
     required this.selectedId,
     required this.onSelect,
     this.hideImages = false,
+    this.mascotType = MascotType.defaultMascot,
   });
 
   final String title, subtitle;
@@ -622,6 +632,7 @@ class _SelectionStep extends StatelessWidget {
   final String selectedId;
   final ValueChanged<String> onSelect;
   final bool hideImages;
+  final MascotType mascotType;
 
   @override
   Widget build(BuildContext context) {
@@ -634,6 +645,7 @@ class _SelectionStep extends StatelessWidget {
           _MascotTitleHeader(
             title: title,
             subtitle: subtitle,
+            mascotType: mascotType,
           ),
           const SizedBox(height: 20),
           ListView.builder(
@@ -848,12 +860,14 @@ class _GoalPickerStep extends StatelessWidget {
     required this.items,
     required this.selectedGoalTime,
     required this.onSelect,
+    this.mascotType = MascotType.defaultMascot,
   });
 
   final String title, subtitle;
   final List<OnboardingItem> items;
   final String selectedGoalTime;
   final ValueChanged<String> onSelect;
+  final MascotType mascotType;
 
   @override
   Widget build(BuildContext context) {
@@ -866,6 +880,7 @@ class _GoalPickerStep extends StatelessWidget {
           _MascotTitleHeader(
             title: title,
             subtitle: subtitle,
+            mascotType: mascotType,
           ),
           const SizedBox(height: 20),
           if (items.isNotEmpty)
@@ -964,12 +979,14 @@ class _MultiSelectStep extends StatelessWidget {
     required this.items,
     required this.selectedIds,
     required this.onToggle,
+    this.mascotType = MascotType.defaultMascot,
   });
 
   final String title, subtitle;
   final List<OnboardingItem> items;
   final List<String> selectedIds;
   final ValueChanged<String> onToggle;
+  final MascotType mascotType;
 
   @override
   Widget build(BuildContext context) {
@@ -982,6 +999,7 @@ class _MultiSelectStep extends StatelessWidget {
           _MascotTitleHeader(
             title: title,
             subtitle: subtitle,
+            mascotType: mascotType,
           ),
           const SizedBox(height: 20),
           ListView.builder(
@@ -1081,6 +1099,7 @@ class _ProfileInfoStepContentState extends State<_ProfileInfoStepContent> {
           const _MascotTitleHeader(
             title: 'Tell us about you',
             subtitle: 'Add your profile details before we continue',
+            mascotType: MascotType.proud,
           ),
           const SizedBox(height: 24),
           // Full Name Card
@@ -1332,7 +1351,7 @@ class _AccountStepContentState extends State<_AccountStepContent> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const NakhlahMascot(size: 120),
+              const NakhlahMascot(size: 120, mascotType: MascotType.thinking),
               const SizedBox(width: 20),
               Expanded(
                 child: Column(
