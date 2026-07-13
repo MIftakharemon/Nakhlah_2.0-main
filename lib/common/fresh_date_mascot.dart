@@ -214,47 +214,47 @@ class _FreshDateMascotState extends State<FreshDateMascot>
     switch (mood) {
       case FreshDateMood.happy:
         final y = t < 0.5
-            ? lerpDouble(0, -3, t * 2)!
-            : lerpDouble(-3, 0, (t - 0.5) * 2)!;
+            ? lerpDouble(0, -10, t * 2)!
+            : lerpDouble(-10, 0, (t - 0.5) * 2)!;
         return (y, 0, 1);
       case FreshDateMood.excited:
       case FreshDateMood.celebrating:
         final s = t < 0.5
-            ? lerpDouble(1, 1.04, t * 2)!
-            : lerpDouble(1.04, 1, (t - 0.5) * 2)!;
+            ? lerpDouble(1, 1.08, t * 2)!
+            : lerpDouble(1.08, 1, (t - 0.5) * 2)!;
         return (0, 0, s);
       case FreshDateMood.sleeping:
         final s = t < 0.5
-            ? lerpDouble(1, 1.02, t * 2)!
-            : lerpDouble(1.02, 1, (t - 0.5) * 2)!;
+            ? lerpDouble(1, 1.04, t * 2)!
+            : lerpDouble(1.04, 1, (t - 0.5) * 2)!;
         return (0, 0, s);
       case FreshDateMood.sad:
         final y = t < 0.5
-            ? lerpDouble(0, 1.5, t * 2)!
-            : lerpDouble(1.5, 0, (t - 0.5) * 2)!;
+            ? lerpDouble(0, 5, t * 2)!
+            : lerpDouble(5, 0, (t - 0.5) * 2)!;
         return (y, 0, 1);
       case FreshDateMood.thinking:
       case FreshDateMood.focused:
         double r;
         if (t < 0.25) {
-          r = lerpDouble(0, 1, t * 4)!;
+          r = lerpDouble(0, 3, t * 4)!;
         } else if (t < 0.5) {
-          r = lerpDouble(1, -1, (t - 0.25) * 4)!;
+          r = lerpDouble(3, -3, (t - 0.25) * 4)!;
         } else if (t < 0.75) {
-          r = lerpDouble(-1, 0, (t - 0.5) * 4)!;
+          r = lerpDouble(-3, 0, (t - 0.5) * 4)!;
         } else {
           r = 0;
         }
         return (0, r, 1);
       case FreshDateMood.encouraging:
         final y = t < 0.5
-            ? lerpDouble(0, -2.5, t * 2)!
-            : lerpDouble(-2.5, 0, (t - 0.5) * 2)!;
+            ? lerpDouble(0, -8, t * 2)!
+            : lerpDouble(-8, 0, (t - 0.5) * 2)!;
         return (y, 0, 1);
       default:
         final y = t < 0.5
-            ? lerpDouble(0, -2, t * 2)!
-            : lerpDouble(-2, 0, (t - 0.5) * 2)!;
+            ? lerpDouble(0, -7, t * 2)!
+            : lerpDouble(-7, 0, (t - 0.5) * 2)!;
         return (y, 0, 1);
     }
   }

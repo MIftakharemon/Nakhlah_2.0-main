@@ -1031,6 +1031,17 @@ class _ZigzagPath extends StatelessWidget {
         return b.unitOrder.compareTo(a.unitOrder);
       });
 
+    var visibleCount = 0;
+    final visibleMascotSections = <int>[];
+    for (var i = 0; i < displaySections.length; i++) {
+      final sn = groupedNodes[displaySections[i].id] ?? [];
+      if (sn.isNotEmpty) {
+        visibleMascotSections.add(i);
+        visibleCount++;
+      }
+    }
+    debugPrint('[VISIBLE] total=${displaySections.length}, visible=$visibleCount, visibleIndices=$visibleMascotSections');
+
     return Column(
       children: [
         for (var sectionIndex = 0;
