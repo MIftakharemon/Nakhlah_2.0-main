@@ -198,7 +198,7 @@ class _MainContent extends StatelessWidget {
         Padding(
           padding: EdgeInsets.fromLTRB(0.5, MediaQuery.of(context).padding.top + 4, 0.5, 0.1),
           child: Obx(() => _GlassStatsBar(
-            streak: gamification.streak.value.currentStreak,
+            streak: gamification.streak.value.computedStreak,
             dates: gamification.stock.value.dateStock,
             palms: gamification.stock.value.palmStock,
             gamification: gamification,
@@ -1030,17 +1030,6 @@ class _ZigzagPath extends StatelessWidget {
         if (cmp != 0) return cmp;
         return b.unitOrder.compareTo(a.unitOrder);
       });
-
-    var visibleCount = 0;
-    final visibleMascotSections = <int>[];
-    for (var i = 0; i < displaySections.length; i++) {
-      final sn = groupedNodes[displaySections[i].id] ?? [];
-      if (sn.isNotEmpty) {
-        visibleMascotSections.add(i);
-        visibleCount++;
-      }
-    }
-    debugPrint('[VISIBLE] total=${displaySections.length}, visible=$visibleCount, visibleIndices=$visibleMascotSections');
 
     return Column(
       children: [

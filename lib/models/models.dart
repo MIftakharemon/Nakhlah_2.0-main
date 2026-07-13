@@ -765,6 +765,49 @@ class StreakModel {
   final String? startDate, lastCompletedDate;
   final List<StreakDateEntry> streakDates;
 
+  /// Compute current streak client-side from dates array (matches web getCurrentStreakCount).
+  int get computedStreak {
+    if (streakDates.isEmpty) return currentStreak;
+
+    // Build status map: missed takes priority over completed
+    final statusMap = <String, String>{};
+    for (final entry in streakDates) {
+      final key = entry.date;
+      if (key.isEmpty) continue;
+      final currentStatus = statusMap[key];
+      if (currentStatus == 'missed') continue;
+      if (entry.status == 'missed' || currentStatus == null) {
+        statusMap[key] = entry.status;
+      }
+    }
+
+    if (statusMap.isEmpty) return currentStreak;
+
+    // Count consecutive completed days backward from today
+    var streak = 0;
+    final now = DateTime.now();
+    for (var offset = 0; offset < 366; offset++) {
+      final day = DateTime(now.year, now.month, now.day - offset);
+      final key =
+          '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
+      final status = statusMap[key];
+
+      if (status == 'completed') {
+        streak++;
+        continue;
+      }
+
+      // Today can be skipped (no entry yet)
+      if (streak == 0 && offset == 0 && status == null) {
+        continue;
+      }
+
+      break;
+    }
+
+    return streak;
+  }
+
   factory StreakModel.fromJson(dynamic value) {
     final j = _map(_unwrap(value));
     if (j == null) return const StreakModel();

@@ -63,7 +63,7 @@ class _StatsViewState extends State<StatsView> {
           final stats = [
             _StatsCardData(
               icon: const Icon(Icons.local_fire_department, color: Color(0xFFEF4444), size: 20),
-              value: '${g.streak.value.currentStreak}',
+              value: '${g.streak.value.computedStreak}',
               label: 'Current Streak',
               subtitle: 'days in a row',
               color: const Color(0xFFEF4444),
@@ -171,7 +171,7 @@ class _StatsViewState extends State<StatsView> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildSummaryItem(
-                          '${g.streak.value.currentStreak}',
+                          '${g.streak.value.computedStreak}',
                           'Streak',
                         ),
                         Container(
