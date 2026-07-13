@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import '../../common/nakhlah_mascot.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_theme.dart';
-import '../../controllers/gamification_controller.dart';
 
 class LessonResultData {
   const LessonResultData({
@@ -15,6 +14,7 @@ class LessonResultData {
     this.scoredQuestions = 0,
     this.correctAnswers = 0,
     this.injazEarned = 0,
+    this.datesEarned = 0,
     this.palmTreesRemaining = 5,
     this.hasWrongAnswer = false,
   });
@@ -25,6 +25,7 @@ class LessonResultData {
   final int scoredQuestions;
   final int correctAnswers;
   final int injazEarned;
+  final int datesEarned;
   final int palmTreesRemaining;
   final bool hasWrongAnswer;
 
@@ -119,13 +120,12 @@ class LessonResultView extends StatelessWidget {
   }
 
   Widget _buildStatsRow(LessonResultData data) {
-    final dateStock = Get.find<GamificationController>().stock.value.dateStock;
     return Row(
       children: [
         Expanded(
           child: _StatBox(
-            label: 'Total Dates',
-            value: '$dateStock',
+            label: 'Dates Earned',
+            value: '${data.datesEarned}',
             icon: SvgPicture.asset(
               'assets/nakhlah_web/icons/dates.svg',
               width: 36,

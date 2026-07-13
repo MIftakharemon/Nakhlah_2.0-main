@@ -398,15 +398,18 @@ class _ExerciseViewState extends State<ExerciseView>
     _timer?.cancel();
     _playSfx('assets/audio/click.mp3');
 
+    dynamic progressResponse;
     try {
       if (_hasWrongAnswer) {
-        await _contentService.makeLearnerProgress(_args!.lessonId);
+        progressResponse = await _contentService.makeLearnerProgress(_args!.lessonId);
       } else {
-        await _contentService.reportFullMarks(_args!.lessonId);
+        progressResponse = await _contentService.reportFullMarks(_args!.lessonId);
       }
     } catch (_) {}
 
     if (!mounted) return;
+
+    final int datesEarned = _extractDatesEarned(progressResponse);
 
     final result = LessonResultData(
       lessonId: _args!.lessonId,
@@ -414,12 +417,34 @@ class _ExerciseViewState extends State<ExerciseView>
       totalQuestions: _totalQuestions,
       scoredQuestions: _scoredQuestions,
       correctAnswers: _correctAnswers,
-      injazEarned: _hasWrongAnswer ? 25 : 50,
+      injazEarned: _extractInjazReceived(progressResponse),
+      datesEarned: datesEarned,
       palmTreesRemaining: _palmTrees,
       hasWrongAnswer: _hasWrongAnswer,
     );
 
     Get.off(() => const LessonResultView(), arguments: result);
+  }
+
+  int _extractDatesEarned(dynamic response) {
+    if (response is! Map) return 0;
+    final val = response['datesReceived'] ??
+        response['dateReceived'] ??
+        response['dateEarned'] ??
+        response['dateStock'];
+    if (val is num) return val.toInt();
+    return int.tryParse('$val') ?? 0;
+  }
+
+  int _extractInjazReceived(dynamic response) {
+    if (response is! Map) return _hasWrongAnswer ? 25 : 50;
+    final val = response['injazReceived'] ??
+        response['InjazReceived'] ??
+        response['InjazEarned'] ??
+        response['injazReward'] ??
+        response['xpEarned'];
+    if (val is num) return val.toInt();
+    return int.tryParse('$val') ?? (_hasWrongAnswer ? 25 : 50);
   }
 
   void _handleContinue() {
