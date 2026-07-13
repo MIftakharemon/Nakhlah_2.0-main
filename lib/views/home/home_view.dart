@@ -21,6 +21,7 @@ import '../../routes/app_routes.dart';
 import '../../widgets/nakhlah_icons.dart';
 import '../exercises/exercise_view.dart';
 import '../../constants/dark_mode_colors.dart';
+import '../../constants/mascot_config.dart';
 
 const _kLastInteractedNodeIdKey = 'nakhlah:lastInteractedNodeId';
 
@@ -1082,19 +1083,8 @@ class _SectionPath extends StatelessWidget {
   final int totalSections;
   final Map<String, GlobalKey> nodeKeys;
 
-  static const _lessonRowHeight = 112.0;
-  static const _mascotVerticalOffset = 0.0;
-  static const _pathFrequency = 0.8;
-
-  static const _mascotSequence = [
-    MascotType.focused,
-    MascotType.encouraging,
-    MascotType.happy,
-    MascotType.thinking,
-    MascotType.excited,
-    MascotType.proud,
-    MascotType.celebrating,
-  ];
+  static const _lessonRowHeight = MascotConfig.lessonRowHeight;
+  static const _pathFrequency = MascotConfig.pathFrequency;
 
   @override
   Widget build(BuildContext context) {
@@ -1108,49 +1098,39 @@ class _SectionPath extends StatelessWidget {
     final displayNodes = nodes.toList()
       ..sort((a, b) => b.taskOrder.compareTo(a.taskOrder));
 
-    // Find gift box (trophy) node in this section for mascot positioning
-    int? giftBoxLocalIndex;
-    int? giftBoxGlobalIndex;
+    // Mascot positioning — opposite side of the gift box (trophy)
+    final sectionStartGlobalIndex = allNodes.indexWhere(
+      (n) => n.sectionId == section.id,
+    );
+    final sectionEndGlobalIndex = allNodes.lastIndexWhere(
+      (n) => n.sectionId == section.id,
+    );
+    final sectionRowCount = sectionEndGlobalIndex - sectionStartGlobalIndex + 1;
+
+    // Find the gift box (trophy) in this section
+    int? trophyLocalIndex;
+    int? trophyGlobalIndex;
     for (var i = 0; i < displayNodes.length; i++) {
       if (displayNodes[i].type == _PathNodeType.trophy) {
-        giftBoxLocalIndex = i;
-        giftBoxGlobalIndex = allNodes.indexWhere((n) => n.id == displayNodes[i].id);
+        trophyLocalIndex = i;
+        trophyGlobalIndex = allNodes.indexWhere(
+          (n) => n.id == displayNodes[i].id,
+        );
         break;
       }
     }
 
-    // Mascot positioning — place at zigzag turning points where space is largest.
-    // The zigzag turns at sine wave extremes (sin = ±1). At those points the path
-    // is at its leftmost/rightmost, leaving the opposite side mostly empty.
-    // Position the mascot in that empty space.
-    final totalLessons = allNodes.length;
-    final halfWave = math.pi / _pathFrequency;
-    final firstTurningPoint = math.pi / (2 * _pathFrequency);
-    final sectionStartGlobalIndex = allNodes.indexWhere(
-      (n) => n.sectionId == section.id,
-    );
-
-    double? mascotMidpoint;
-    bool mascotOnLeft = false;
-    int slotIndex = 0;
-
-    for (
-      var tp = firstTurningPoint;
-      tp + halfWave <= totalLessons;
-      tp += halfWave, slotIndex++
-    ) {
-      // Use midpoint only to find which section this zigzag slot belongs to
-      final midpoint = tp + halfWave / 2;
-      final anchorIdx = midpoint.floor().clamp(0, totalLessons - 1);
-      final anchorNode = allNodes[anchorIdx];
-      if (anchorNode.sectionId != section.id) continue;
-
-      // Position at the turning point (not midpoint) — more empty space there
-      mascotMidpoint = tp;
-      // Turning point sin: +1 (rightmost → empty left) or -1 (leftmost → empty right)
-      final sinVal = math.sin(tp * _pathFrequency);
-      mascotOnLeft = sinVal > 0;
+    // Horizontal: opposite side of the gift box
+    bool mascotOnLeft;
+    if (trophyGlobalIndex != null) {
+      final giftBoxOnRight = math.sin(trophyGlobalIndex * _pathFrequency) > 0;
+      mascotOnLeft = giftBoxOnRight;
+    } else {
+      mascotOnLeft = false;
     }
+
+    // Vertical: same row as the gift box
+    final mascotLocalRow = trophyLocalIndex ?? (sectionRowCount / 2).floor();
 
     return Column(
       children: [
@@ -1182,36 +1162,28 @@ class _SectionPath extends StatelessWidget {
                       ),
                   ],
                 ),
-                // Mascot — absolute positioned within section, like web
-                // Web: left=MASCOT_SIDE_POSITIONS, top=(midpoint-levelStart)*ROW+ROW/2+OFFSET,
-                //       transform="translate(-50%, -50%)"
-                if (mascotMidpoint != null)
-                  Positioned(
-                    top: (sectionIndex == 0 && giftBoxLocalIndex != null
-                            ? giftBoxLocalIndex.toDouble()
-                            : mascotMidpoint - sectionStartGlobalIndex) *
-                            _lessonRowHeight +
-                        _lessonRowHeight / 2 +
-                        _mascotVerticalOffset -
+                // Mascot — positioned in empty space opposite the coins
+                Positioned(
+                    top: mascotLocalRow * MascotConfig.lessonRowHeight +
+                        MascotConfig.lessonRowHeight / 2 +
+                        MascotConfig.verticalFor(sectionIndex) -
                         65,
                     left: (() {
-                      // Unit 1 (first from bottom): place mascot left of gift box
-                      if (section.unitOrder == 1 && giftBoxGlobalIndex != null) return 0.18;
-                      // Top section: place mascot opposite side of gift box
-                      if (sectionIndex == 0 && giftBoxGlobalIndex != null) {
-                        final giftBoxOnRight = math.sin(giftBoxGlobalIndex * _pathFrequency) > 0;
-                        return giftBoxOnRight ? 0.18 : 0.72;
-                      }
-                      // 3rd mascot from bottom: far right side
-                      if (sectionIndex == totalSections - 3) return 0.92;
-                      return mascotOnLeft ? 0.70 : 0.20;
+                      // Per-slot override wins immediately
+                      final slot = MascotConfig.slots[sectionIndex];
+                      if (slot?.horizontal != null) return slot!.horizontal!;
+                      // Coins sit in the 25%–75% band (sin wave * 25 + 50).
+                      // Mascot must be OUTSIDE that band to avoid overlap.
+                      // mascotOnLeft = true → coins are on the RIGHT → mascot goes LEFT
+                      // mascotOnLeft = false → coins are on the LEFT → mascot goes RIGHT
+                      return mascotOnLeft ? 0.12 : 0.82;
                     })() *
                             constraints.maxWidth -
-                        50,
+                        30,
                     child: NakhlahMascot(
-                      size: 100,
-                      mascotType: _mascotSequence[sectionIndex % _mascotSequence.length],
-                      animate: true,
+                      size: MascotConfig.sizeFor(sectionIndex),
+                      mascotType: MascotConfig.typeFor(sectionIndex),
+                      animate: MascotConfig.animateFor(sectionIndex),
                     ),
                   ),
               ],
