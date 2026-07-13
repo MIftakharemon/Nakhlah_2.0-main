@@ -85,7 +85,7 @@ class LessonResultView extends StatelessWidget {
   }
 
   Widget _buildMascot() {
-    return const NakhlahMascot(size: 108, animate: false);
+    return const NakhlahMascot(size: 108, mascotType: MascotType.celebrating, animate: false);
   }
 
   Widget _buildInjazBanner(LessonResultData data) {

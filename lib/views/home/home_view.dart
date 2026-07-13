@@ -8,7 +8,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../common/app_motion.dart';
 import '../../common/empty_state.dart';
-import '../../common/fresh_date_mascot.dart';
+import '../../common/nakhlah_mascot.dart';
 import '../../common/loading_state.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
@@ -1083,8 +1083,18 @@ class _SectionPath extends StatelessWidget {
   final Map<String, GlobalKey> nodeKeys;
 
   static const _lessonRowHeight = 112.0;
-  static const _mascotVerticalOffset = -150.0;
+  static const _mascotVerticalOffset = 0.0;
   static const _pathFrequency = 0.8;
+
+  static const _mascotSequence = [
+    MascotType.focused,
+    MascotType.encouraging,
+    MascotType.happy,
+    MascotType.thinking,
+    MascotType.excited,
+    MascotType.proud,
+    MascotType.celebrating,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -1109,10 +1119,10 @@ class _SectionPath extends StatelessWidget {
       }
     }
 
-    // Mascot positioning — matches web ZigzagPath exactly:
-    // 1. Compute midpoint using global lesson count (allNodes.length)
-    // 2. Find which midpoints anchor to this section
-    // 3. Position = (midpoint - sectionStartGlobalIndex) * ROW + ROW/2 + OFFSET
+    // Mascot positioning — place at zigzag turning points where space is largest.
+    // The zigzag turns at sine wave extremes (sin = ±1). At those points the path
+    // is at its leftmost/rightmost, leaving the opposite side mostly empty.
+    // Position the mascot in that empty space.
     final totalLessons = allNodes.length;
     final halfWave = math.pi / _pathFrequency;
     final firstTurningPoint = math.pi / (2 * _pathFrequency);
@@ -1129,13 +1139,16 @@ class _SectionPath extends StatelessWidget {
       tp + halfWave <= totalLessons;
       tp += halfWave, slotIndex++
     ) {
+      // Use midpoint only to find which section this zigzag slot belongs to
       final midpoint = tp + halfWave / 2;
       final anchorIdx = midpoint.floor().clamp(0, totalLessons - 1);
       final anchorNode = allNodes[anchorIdx];
       if (anchorNode.sectionId != section.id) continue;
 
-      mascotMidpoint = midpoint;
-      final sinVal = math.sin(midpoint * _pathFrequency);
+      // Position at the turning point (not midpoint) — more empty space there
+      mascotMidpoint = tp;
+      // Turning point sin: +1 (rightmost → empty left) or -1 (leftmost → empty right)
+      final sinVal = math.sin(tp * _pathFrequency);
       mascotOnLeft = sinVal > 0;
     }
 
@@ -1182,24 +1195,22 @@ class _SectionPath extends StatelessWidget {
                         _mascotVerticalOffset -
                         65,
                     left: (() {
-                      if (section.unitOrder == 6 || section.unitOrder == 7) return 0.85;
-                      if (sectionIndex == 2 || sectionIndex == 6) return 0.85;
-                      if (sectionIndex == 7) return 0.20;
-                      if (sectionIndex == totalSections - 10) return 0.20;
-                      if (sectionIndex == totalSections - 11 || sectionIndex == totalSections - 14) return 0.78;
-                      if (section.levelOrder == 5 && section.unitOrder == 17) return 0.20;
-                      // Section 0: place mascot next to gift box (opposite side)
+                      // Unit 1 (first from bottom): place mascot left of gift box
+                      if (section.unitOrder == 1 && giftBoxGlobalIndex != null) return 0.18;
+                      // Top section: place mascot opposite side of gift box
                       if (sectionIndex == 0 && giftBoxGlobalIndex != null) {
                         final giftBoxOnRight = math.sin(giftBoxGlobalIndex * _pathFrequency) > 0;
-                        return giftBoxOnRight ? 0.22 : 0.78;
+                        return giftBoxOnRight ? 0.18 : 0.72;
                       }
-                      return mascotOnLeft ? 0.22 : 0.78;
+                      // 3rd mascot from bottom: far right side
+                      if (sectionIndex == totalSections - 3) return 0.92;
+                      return mascotOnLeft ? 0.70 : 0.20;
                     })() *
                             constraints.maxWidth -
                         50,
-                    child: const FreshDateMascot(
+                    child: NakhlahMascot(
                       size: 100,
-                      mood: FreshDateMood.happy,
+                      mascotType: _mascotSequence[sectionIndex % _mascotSequence.length],
                       animate: true,
                     ),
                   ),

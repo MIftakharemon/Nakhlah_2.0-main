@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../../common/app_snackbar.dart';
+import '../../common/nakhlah_mascot.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_theme.dart';
 import '../../controllers/gamification_controller.dart';
@@ -554,29 +555,82 @@ class _ExerciseViewState extends State<ExerciseView>
   void _showLeavingDialog() {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Leave lesson?',
-            style: TextStyle(fontWeight: FontWeight.w900)),
-        content:
-        const Text('Your progress in this lesson will be lost.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Stay',
-                style: TextStyle(fontWeight: FontWeight.w800)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Get.back();
-            },
-            child: const Text('Leave',
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const NakhlahMascot(size: 100, mascotType: MascotType.sad, animate: false),
+              const SizedBox(height: 20),
+              const Text(
+                'Leaving Already?',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: AppColors.wrongRed,
-                    fontWeight: FontWeight.w800)),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.ink,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Are you sure you want to leave the lesson? Your progress won\'t be saved.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.muted,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Stay',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Get.back();
+                  },
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'Leave',
+                    style: TextStyle(
+                      color: AppColors.wrongRed,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

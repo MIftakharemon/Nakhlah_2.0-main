@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../common/nakhlah_intro_widgets.dart';
 import '../../common/app_motion.dart';
+import '../../common/nakhlah_intro_widgets.dart';
+import '../../common/nakhlah_mascot.dart';
 import '../../constants/app_colors.dart';
 import '../../controllers/auth_controller.dart';
 import '../../routes/app_routes.dart';
@@ -35,11 +36,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const IntroHeroImage(
-              asset: IntroAssets.leafBook,
-              height: 190,
-              blobColor: AppColors.accent,
-            ),
+            const NakhlahMascot(size: 140, mascotType: MascotType.sad),
             const SizedBox(height: 14),
 
             AnimatedSwitcher(

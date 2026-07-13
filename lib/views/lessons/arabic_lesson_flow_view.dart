@@ -773,7 +773,7 @@ class LessonCompleteStepWidget extends StatelessWidget {
           child: Column(
             children: [
               const Spacer(),
-              const NakhlahMascot(size: 108, animate: false),
+              const NakhlahMascot(size: 108, mascotType: MascotType.celebrating, animate: false),
               const SizedBox(height: 18),
               const Text(
                 'Lesson completed!',
