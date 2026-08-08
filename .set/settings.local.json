@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Bash(curl -s -X POST https://nakhlah-api.nakhlah.net/api/users/login -H 'Content-Type: application/json' -d '{\"email\":\"a@b.com\",\"password\":\"Asdfgh@11\"}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM2ZjZmOTI5LWRkMzgtNGQyOS1hYmMxLTc5OTY3ZDgzYTY0ZSIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoiYUBiLmNvbSIsInNpZCI6ImEyNmM3NmNjLTRjODktNGM3Yy04MzZkLWY4YTY5ZjlmODk1MyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc4NjYzNjQzLCJleHAiOjE3Nzg2NzA4NDN9.ruMgaJOlGgGilQPMutTItJzK166SmD27IoNY0Envy6w' https://nakhlah-api.nakhlah.net/api/users/me)",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM2ZjZmOTI5LWRkMzgtNGQyOS1hYmMxLTc5OTY3ZDgzYTY0ZSIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoiYUBiLmNvbSIsInNpZCI6ImEyNmM3NmNjLTRjODktNGM3Yy04MzZkLWY4YTY5ZjlmODk1MyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc4NjYzNjQzLCJleHAiOjE3Nzg2NzA4NDN9.ruMgaJOlGgGilQPMutTItJzK166SmD27IoNY0Envy6w' https://nakhlah-api.nakhlah.net/api/globals/help-center)",
+      "Bash(curl -s https://nakhlah-api.nakhlah.net/api/globals/about)",
+      "Bash(curl -s https://nakhlah-api.nakhlah.net/api/globals/legal-documents)",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM2ZjZmOTI5LWRkMzgtNGQyOS1hYmMxLTc5OTY3ZDgzYTY0ZSIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoiYUBiLmNvbSIsInNpZCI6ImEyNmM3NmNjLTRjODktNGM3Yy04MzZkLWY4YTY5ZjlmODk1MyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc4NjYzNjQzLCJleHAiOjE3Nzg2NzA4NDN9.ruMgaJOlGgGilQPMutTItJzK166SmD27IoNY0Envy6w' https://nakhlah-api.nakhlah.net/api/globals/about)",
+      "Bash(curl -s https://nakhlah-api.nakhlah.net/api/globals/gamification/get-daily-quests)",
+      "Bash(curl -s -X POST https://nakhlah-api.nakhlah.net/api/user-profile -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM2ZjZmOTI5LWRkMzgtNGQyOS1hYmMxLTc5OTY3ZDgzYTY0ZSIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoiYUBiLmNvbSIsInNpZCI6ImEyNmM3NmNjLTRjODktNGM3Yy04MzZkLWY4YTY5ZjlmODk1MyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc4NjYzNjQzLCJleHAiOjE3Nzg2NzA4NDN9.ruMgaJOlGgGilQPMutTItJzK166SmD27IoNY0Envy6w' -H 'Content-Type: application/json' -d '{\"onboardInfo\":{\"age\":\"30 - 35\",\"country\":\"Bangladesh\",\"purpose\":\"Travel\",\"goalTime\":10,\"userSource\":\"facebook\",\"languageStrength\":\"Basic\"}}')",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM2ZjZmOTI5LWRkMzgtNGQyOS1hYmMxLTc5OTY3ZDgzYTY0ZSIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoiYUBiLmNvbSIsInNpZCI6ImEyNmM3NmNjLTRjODktNGM3Yy04MzZkLWY4YTY5ZjlmODk1MyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc4NjYzNjQzLCJleHAiOjE3Nzg2NzA4NDN9.ruMgaJOlGgGilQPMutTItJzK166SmD27IoNY0Envy6w' https://nakhlah-api.nakhlah.net/api/user-profile)",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM2ZjZmOTI5LWRkMzgtNGQyOS1hYmMxLTc5OTY3ZDgzYTY0ZSIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoiYUBiLmNvbSIsInNpZCI6ImEyNmM3NmNjLTRjODktNGM3Yy04MzZkLWY4YTY5ZjlmODk1MyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc4NjYzNjQzLCJleHAiOjE3Nzg2NzA4NDN9.ruMgaJOlGgGilQPMutTItJzK166SmD27IoNY0Envy6w' https://nakhlah-api.nakhlah.net/api/globals/gamification/get-badges)",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM2ZjZmOTI5LWRkMzgtNGQyOS1hYmMxLTc5OTY3ZDgzYTY0ZSIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoiYUBiLmNvbSIsInNpZCI6ImEyNmM3NmNjLTRjODktNGM3Yy04MzZkLWY4YTY5ZjlmODk1MyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc4NjYzNjQzLCJleHAiOjE3Nzg2NzA4NDN9.ruMgaJOlGgGilQPMutTItJzK166SmD27IoNY0Envy6w' https://nakhlah-api.nakhlah.net/api/globals/questionnaires/tasks/6a02fb1b4eef6f002095da0a/lessons)",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM2ZjZmOTI5LWRkMzgtNGQyOS1hYmMxLTc5OTY3ZDgzYTY0ZSIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoiYUBiLmNvbSIsInNpZCI6ImEyNmM3NmNjLTRjODktNGM3Yy04MzZkLWY4YTY5ZjlmODk1MyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc4NjYzNjQzLCJleHAiOjE3Nzg2NzA4NDN9.ruMgaJOlGgGilQPMutTItJzK166SmD27IoNY0Envy6w' https://nakhlah-api.nakhlah.net/api/globals/questionnaires/lessons/6a02fb1b4eef6f002095d9f5)",
+      "Bash(curl -s -X POST https://nakhlah-api.nakhlah.net/api/users/forgot-password -H 'Content-Type: application/json' -d '{\"email\":\"a@b.com\"}')"
+    ]
+  }
+}
