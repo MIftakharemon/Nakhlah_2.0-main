@@ -23,6 +23,7 @@ Future<void> main() async {
   Get.put(ApiService(storage), permanent: true);
   Get.put(ThemeController(), permanent: true);
 
+
   await _refreshSessionOnStartup();
   runApp(const NakhlahApp());
   _startSessionRefreshTimer();
